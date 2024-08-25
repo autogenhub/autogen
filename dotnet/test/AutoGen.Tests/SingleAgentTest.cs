@@ -7,8 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoGen.LMStudio;
-using AutoGen.OpenAI;
-using AutoGen.OpenAI.Extension;
+using AutoGen.OpenAI.V1;
+using AutoGen.OpenAI.V1.Extension;
 using Azure.AI.OpenAI;
 using FluentAssertions;
 using Xunit;
@@ -71,7 +71,7 @@ namespace AutoGen.Tests
                     { nameof(GetHighestLabel), this.GetHighestLabelWrapper },
                 });
 
-            var imageUri = new Uri(@"https://microsoft.github.io/autogen/assets/images/level2algebra-659ba95286432d9945fc89e84d606797.png");
+            var imageUri = new Uri(@"https://autogen-ai.github.io/autogen/assets/images/level2algebra-659ba95286432d9945fc89e84d606797.png");
             var oaiMessage = new ChatRequestUserMessage(
                 new ChatMessageTextContentItem("which label has the highest inference cost"),
                 new ChatMessageImageContentItem(imageUri));

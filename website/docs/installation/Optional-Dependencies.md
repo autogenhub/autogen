@@ -1,5 +1,16 @@
 # Optional Dependencies
 
+## Different LLMs
+
+AutoGen installs OpenAI package by default. To use LLMs by other providers, you can install the following packages:
+
+```bash
+pip install pyautogen[gemini,anthropic,mistral,together,groq,cohere]
+```
+
+Check out the [notebook](https://github.com/autogen-ai/autogen/blob/main/notebook/autogen_uniformed_api_calling.ipynb) and 
+[blogpost](/blog/2024/06/24/AltModels-Classes) for more details.
+
 ## LLM Caching
 
 To use LLM caching with Redis, you need to install the Python package with
@@ -36,11 +47,7 @@ proxy = UserProxyAgent(name="proxy", code_execution_config={"executor": "ipython
 pip install "pyautogen[blendsearch]<0.2"
 ```
 
-Example notebooks:
-
-[Optimize for Code Generation](https://github.com/autogen-ai/autogen/blob/main/notebook/oai_completion.ipynb)
-
-[Optimize for Math](https://github.com/autogen-ai/autogen/blob/main/notebook/oai_chatgpt_gpt4.ipynb)
+Checkout [Optimize for Code Generation](https://github.com/autogen-ai/autogen/blob/main/notebook/oai_completion.ipynb) and [Optimize for Math](https://github.com/autogen-ai/autogen/blob/main/notebook/oai_chatgpt_gpt4.ipynb) for details.
 
 ## retrievechat
 
@@ -95,9 +102,7 @@ We offered Multimodal Conversable Agent and LLaVA Agent. Please install with the
 pip install "pyautogen[lmm]"
 ```
 
-Example notebooks:
-
-[LLaVA Agent](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_lmm_llava.ipynb)
+Example notebook: [LLaVA Agent](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_lmm_llava.ipynb)
 
 ## mathchat
 
@@ -107,9 +112,7 @@ Example notebooks:
 pip install "pyautogen[mathchat]<0.2"
 ```
 
-Example notebooks:
-
-[Using MathChat to Solve Math Problems](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_MathChat.ipynb)
+Example notebook: [Using MathChat to Solve Math Problems](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_MathChat.ipynb)
 
 ## Graph
 

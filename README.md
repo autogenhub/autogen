@@ -308,27 +308,13 @@ In addition, you can find:
   </a>
 </p>
 
-<!--
-# Legal Notices
+## License Update
+As of August 25, 2024, this project is licensed under the Apache License, Version 2.0 (Apache-2.0). We have chosen this license to ensure that future contributions are protected under terms that explicitly address patent rights and provide explicit trademark protection.
 
-Microsoft and any contributors grant you a license to the Microsoft documentation and other content
-in this repository under the [Creative Commons Attribution 4.0 International Public License](https://creativecommons.org/licenses/by/4.0/legalcode),
-see the [LICENSE](LICENSE) file, and grant you a license to any code in the repository under the [MIT License](https://opensource.org/licenses/MIT), see the
-[LICENSE-CODE](LICENSE-CODE) file.
+### Historical Licensing
+Please note that prior contributions up to August 24, 2024, were made under the MIT License. This licensing still covers the original code from the upstream project and any contributions made to our project before this date. The original MIT License allows for substantial freedom in usage and redistribution, but it does not provide an express grant of patent rights.
 
-Microsoft, Windows, Microsoft Azure, and/or other Microsoft products and services referenced in the documentation
-may be either trademarks or registered trademarks of Microsoft in the United States and/or other countries.
-The licenses for this project do not grant you rights to use any Microsoft names, logos, or trademarks.
-Microsoft's general trademark guidelines can be found at http://go.microsoft.com/fwlink/?LinkID=254653.
+### Contributions
+Moving forward, any new contributions to this project from August 25, 2024, onwards are to be licensed under the Apache 2.0 License. By contributing after this date, contributors agree to abide by the terms of the Apache 2.0 License.
 
-Privacy information can be found at https://privacy.microsoft.com/en-us/
-
-Microsoft and any contributors reserve all other rights, whether under their respective copyrights, patents,
-or trademarks, whether by implication, estoppel, or otherwise.
-
-<p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
-  <a href="#readme-top" style="text-decoration: none; color: blue; font-weight: bold;">
-    ↑ Back to Top ↑
-  </a>
-</p>
--->
+We have documented these changes for clarity and to ensure transparency with our user and contributor community. For further details on the license specifications, please see the LICENSE file included in this repository.

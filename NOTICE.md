@@ -4,7 +4,7 @@ Copyright (c) 2023-2024, Owners of https://github.com/autogen-ai
 
 This project is a fork of https://github.com/microsoft/autogen.
 
-The [original project](https://github.com/microsoft/autogen) is licensed under the MIT License as detailed in [LICENSE_originial_MIT](./LICENSE_original_MIT). The fork was created from version v0.2.35 of the original project.
+The [original project](https://github.com/microsoft/autogen) is licensed under the MIT License as detailed in [LICENSE_original_MIT](./license_original/LICENSE_original_MIT). The fork was created from version v0.2.35 of the original project.
 
 
 This project, i.e., https://github.com/autogen-ai/autogen, is licensed under the Apache License, Version 2.0 as detailed in [LICENSE](./LICENSE)

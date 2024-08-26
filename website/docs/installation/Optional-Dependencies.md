@@ -112,7 +112,7 @@ Example notebook: [LLaVA Agent](/docs/notebooks/agentchat_lmm_llava)
 pip install "pyautogen[mathchat]<0.2"
 ```
 
-Example notebook: [Using MathChat to Solve Math Problems](/docs/notebooks/agentchat_MathChat)
+Example notebook: [Using MathChat to Solve Math Problems](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_MathChat.ipynb)
 
 ## Graph
 

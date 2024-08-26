@@ -113,7 +113,7 @@ setuptools.setup(
     extras_require=extra_require,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache License 2.0",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.8,<3.13",

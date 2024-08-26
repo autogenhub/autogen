@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Portions derived from  https://github.com/microsoft/autogen are under the MIT License..
+# Portions derived from  https://github.com/microsoft/autogen are under the MIT License.
 # SPDX-License-Identifier: MIT
 from autogencap.ag_adapter.CAPGroupChat import CAPGroupChat
 from autogencap.ag_adapter.CAPGroupChatManager import CAPGroupChatManager

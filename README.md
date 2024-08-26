@@ -309,7 +309,7 @@ In addition, you can find:
 </p>
 
 ## License
-This project is licensed under the [Apache License, Version 2.0 (Apache-2.0)](./LICENSE). We have chosen this license to ensure that future contributions are protected under terms that explicitly address patent rights and provide explicit trademark protection.
+This project is licensed under the [Apache License, Version 2.0 (Apache-2.0)](./LICENSE).
 
 This project is a fork of https://github.com/microsoft/autogen and contains code under two licenses:
 

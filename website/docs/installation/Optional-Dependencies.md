@@ -8,7 +8,7 @@ AutoGen installs OpenAI package by default. To use LLMs by other providers, you 
 pip install pyautogen[gemini,anthropic,mistral,together,groq,cohere]
 ```
 
-Check out the [notebook](https://github.com/autogen-ai/autogen/blob/main/notebook/autogen_uniformed_api_calling.ipynb) and
+Check out the [notebook](/docs/notebooks/autogen_uniformed_api_calling.ipynb) and
 [blogpost](/blog/2024/06/24/AltModels-Classes) for more details.
 
 ## LLM Caching
@@ -102,7 +102,7 @@ We offered Multimodal Conversable Agent and LLaVA Agent. Please install with the
 pip install "pyautogen[lmm]"
 ```
 
-Example notebook: [LLaVA Agent](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_lmm_llava.ipynb)
+Example notebook: [LLaVA Agent](/docs/notebooks/agentchat_lmm_llava.ipynb)
 
 ## mathchat
 

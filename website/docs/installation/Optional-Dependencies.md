@@ -20,7 +20,7 @@ the option `redis`:
 pip install "pyautogen[redis]"
 ```
 
-See [LLM Caching](Use-Cases/agent_chat.md#llm-caching) for details.
+See [LLM Caching](/docs/topics/llm-caching) for details.
 
 ## IPython Code Executor
 
@@ -92,7 +92,7 @@ To use Teachability, please install AutoGen with the [teachable] option.
 pip install "pyautogen[teachable]"
 ```
 
-Example notebook: [Chatting with a teachable agent](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_teachability.ipynb)
+Example notebook: [Chatting with a teachable agent](/docs/notebooks/agentchat_teachability)
 
 ## Large Multimodal Model (LMM) Agents
 
@@ -112,7 +112,7 @@ Example notebook: [LLaVA Agent](/docs/notebooks/agentchat_lmm_llava)
 pip install "pyautogen[mathchat]<0.2"
 ```
 
-Example notebook: [Using MathChat to Solve Math Problems](https://github.com/autogen-ai/autogen/blob/main/notebook/agentchat_MathChat.ipynb)
+Example notebook: [Using MathChat to Solve Math Problems](/docs/notebooks/agentchat_MathChat)
 
 ## Graph
 
@@ -122,7 +122,7 @@ To use a graph in `GroupChat`, particularly for graph visualization, please inst
 pip install "pyautogen[graph]"
 ```
 
-Example notebook: [Finite State Machine graphs to set speaker transition constraints](https://autogen-ai.github.io/autogen/docs/notebooks/agentchat_groupchat_finite_state_machine)
+Example notebook: [Finite State Machine graphs to set speaker transition constraints](/docs/notebooks/agentchat_groupchat_finite_state_machine)
 
 ## Long Context Handling
 

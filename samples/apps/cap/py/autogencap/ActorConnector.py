@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Original portions of this file are derived from https://github.com/microsoft/autogen under the MIT License, as of August 24, 2024, before release v0.2.35.
+# Portions derived from  https://github.com/microsoft/autogen are under the MIT License..
 # SPDX-License-Identifier: MIT
 # Agent_Sender takes a zmq context, Topic and creates a
 # socket that can publish to that topic. It exposes this functionality

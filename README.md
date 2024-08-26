@@ -308,13 +308,13 @@ In addition, you can find:
   </a>
 </p>
 
-## License Update
-As of August 25, 2024, this project is licensed under the Apache License, Version 2.0 (Apache-2.0). We have chosen this license to ensure that future contributions are protected under terms that explicitly address patent rights and provide explicit trademark protection.
+## License
+This project is licensed under the [Apache License, Version 2.0 (Apache-2.0)](./LICENSE). We have chosen this license to ensure that future contributions are protected under terms that explicitly address patent rights and provide explicit trademark protection.
 
-### Historical Licensing
-Please note that prior contributions up to August 24, 2024, were made under the MIT License. This licensing still covers the original code from the upstream project and any contributions made to our project before this date. The original MIT License allows for substantial freedom in usage and redistribution, but it does not provide an express grant of patent rights.
+This project is a fork of https://github.com/microsoft/autogen and contains code under two licenses:
 
-### Contributions
-Moving forward, any new contributions to this project from August 25, 2024, onwards are to be licensed under the Apache 2.0 License. By contributing after this date, contributors agree to abide by the terms of the Apache 2.0 License.
+- The original code from https://github.com/microsoft/autogen is licensed under the MIT License.  See the [LICENSE_originial_MIT](./LICENSE_original_MIT) file for details.
 
-We have documented these changes for clarity and to ensure transparency with our user and contributor community. For further details on the license specifications, please see the LICENSE file included in this repository.
+- Modifications and additions made in this fork are licensed under the Apache License, Version 2.0. See the  [LICENSE](./LICENSE) file for the full license text.
+
+We have documented these changes for clarity and to ensure transparency with our user and contributor community. For more details, please see the [NOTICE](./NOTICE.md) file.

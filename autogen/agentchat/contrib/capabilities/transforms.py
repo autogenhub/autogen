@@ -448,7 +448,25 @@ class TextMessageCompressor:
 
 
 class TextMessageContentName:
-    """A transform for including the agent's name in the content of a message."""
+    """A transform for including the agent's name in the content of a message.
+
+    How to create and apply the transform:
+    # Imports
+    from autogen.agentchat.contrib.capabilities import transform_messages, transforms
+
+    # Create Transform
+    name_transform = transforms.TextMessageContentName(position="start", format_string="'{name}' said:\n")
+
+    # Create the TransformMessages
+    context_handling = transform_messages.TransformMessages(
+                transforms=[
+                    name_transform
+                ]
+            )
+
+    # Add it to an agent so when they run inference it will apply to the messages
+    context_handling.add_to_agent(my_agent)
+    """
 
     def __init__(
         self,
@@ -469,10 +487,8 @@ class TextMessageContentName:
                 excluded from compression. If False, messages that match the filter will be compressed.
         """
 
-        assert isinstance(position, str) and position is not None
-        assert position in ["start", "end"]
-        assert isinstance(format_string, str) and format_string is not None
-        assert "{name}" in format_string
+        assert isinstance(position, str) and position in ["start", "end"]
+        assert isinstance(format_string, str) and "{name}" in format_string
         assert isinstance(deduplicate, bool) and deduplicate is not None
 
         self._position = position

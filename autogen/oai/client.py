@@ -96,7 +96,7 @@ try:
     ollama_import_exception: Optional[ImportError] = None
 except ImportError as e:
     ollama_import_exception = e
-    
+
 try:
     from autogen.oai.bedrock import BedrockClient
 

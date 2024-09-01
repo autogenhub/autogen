@@ -1,8 +1,15 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+// SPDX-License-Identifier: Apache-2.0
+// Contributions to this project, i.e., https://github.com/autogen-ai/autogen, 
+// are licensed under the Apache License, Version 2.0 (Apache-2.0).
+// Portions derived from  https://github.com/microsoft/autogen under the MIT License.
+// SPDX-License-Identifier: MIT
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Content.cs
 
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using AutoGen.Anthropic.Converters;
 
 namespace AutoGen.Anthropic.DTO;
 
@@ -10,6 +17,9 @@ public abstract class ContentBase
 {
     [JsonPropertyName("type")]
     public abstract string Type { get; }
+
+    [JsonPropertyName("cache_control")]
+    public CacheControl? CacheControl { get; set; }
 }
 
 public class TextContent : ContentBase
@@ -19,6 +29,12 @@ public class TextContent : ContentBase
 
     [JsonPropertyName("text")]
     public string? Text { get; set; }
+
+    public static TextContent CreateTextWithCacheControl(string text) => new()
+    {
+        Text = text,
+        CacheControl = new CacheControl { Type = CacheControlType.Ephemeral }
+    };
 }
 
 public class ImageContent : ContentBase
@@ -67,4 +83,19 @@ public class ToolResultContent : ContentBase
 
     [JsonPropertyName("content")]
     public string? Content { get; set; }
+}
+
+public class CacheControl
+{
+    [JsonPropertyName("type")]
+    public CacheControlType Type { get; set; }
+
+    public static CacheControl Create() => new CacheControl { Type = CacheControlType.Ephemeral };
+}
+
+[JsonConverter(typeof(JsonPropertyNameEnumConverter<CacheControlType>))]
+public enum CacheControlType
+{
+    [JsonPropertyName("ephemeral")]
+    Ephemeral
 }

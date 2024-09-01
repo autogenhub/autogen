@@ -1,4 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+// SPDX-License-Identifier: Apache-2.0
+// Contributions to this project, i.e., https://github.com/autogen-ai/autogen, 
+// are licensed under the Apache License, Version 2.0 (Apache-2.0).
+// Portions derived from  https://github.com/microsoft/autogen under the MIT License.
+// SPDX-License-Identifier: MIT
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // RolePlayOrchestratorTests.cs
 
 using System;
@@ -10,11 +16,14 @@ using System.Threading.Tasks;
 using AutoGen.Anthropic;
 using AutoGen.Anthropic.Extensions;
 using AutoGen.Anthropic.Utils;
+using AutoGen.AzureAIInference;
+using AutoGen.AzureAIInference.Extension;
 using AutoGen.Gemini;
 using AutoGen.Mistral;
 using AutoGen.Mistral.Extension;
-using AutoGen.OpenAI;
-using AutoGen.OpenAI.Extension;
+using AutoGen.OpenAI.V1;
+using AutoGen.OpenAI.V1.Extension;
+using Azure.AI.Inference;
 using Azure.AI.OpenAI;
 using FluentAssertions;
 using Moq;
@@ -299,6 +308,22 @@ public class RolePlayOrchestratorTests
             client: client,
             name: "MistralClientAgent",
             model: "open-mistral-7b")
+            .RegisterMessageConnector();
+
+        await CoderReviewerRunnerTestAsync(agent);
+    }
+
+    [ApiKeyFact("GH_API_KEY")]
+    public async Task LLaMA_3_1_CoderReviewerRunnerTestAsync()
+    {
+        var apiKey = Environment.GetEnvironmentVariable("GH_API_KEY") ?? throw new InvalidOperationException("GH_API_KEY is not set.");
+        var endPoint = "https://models.inference.ai.azure.com";
+
+        var chatCompletionClient = new ChatCompletionsClient(new Uri(endPoint), new Azure.AzureKeyCredential(apiKey));
+        var agent = new ChatCompletionsClientAgent(
+            chatCompletionsClient: chatCompletionClient,
+            name: "assistant",
+            modelName: "Meta-Llama-3.1-70B-Instruct")
             .RegisterMessageConnector();
 
         await CoderReviewerRunnerTestAsync(agent);

@@ -1,3 +1,10 @@
+# Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Portions derived from  https://github.com/microsoft/autogen are under the MIT License.
+# SPDX-License-Identifier: MIT
+import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from autogen.agentchat.agent import Agent
@@ -16,6 +23,11 @@ class RetrieveAssistantAgent(AssistantAgent):
     """
 
     def __init__(self, *args, **kwargs):
+        warnings.warn(
+            "The RetrieveAssistantAgent is deprecated. Please use the AssistantAgent instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         super().__init__(*args, **kwargs)
         self.register_reply(Agent, RetrieveAssistantAgent._generate_retrieve_assistant_reply)
 

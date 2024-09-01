@@ -1,3 +1,9 @@
+# Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Portions derived from  https://github.com/microsoft/autogen are under the MIT License.
+# SPDX-License-Identifier: MIT
 import importlib.metadata
 import json
 import logging
@@ -28,6 +34,7 @@ OAI_PRICE1K = {
     # gpt-4o
     "gpt-4o": (0.005, 0.015),
     "gpt-4o-2024-05-13": (0.005, 0.015),
+    "gpt-4o-2024-08-06": (0.0025, 0.01),
     # gpt-4-turbo
     "gpt-4-turbo-2024-04-09": (0.01, 0.03),
     # gpt-4

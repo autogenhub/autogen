@@ -1,4 +1,10 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+﻿// Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+// SPDX-License-Identifier: Apache-2.0
+// Contributions to this project, i.e., https://github.com/autogen-ai/autogen, 
+// are licensed under the Apache License, Version 2.0 (Apache-2.0).
+// Portions derived from  https://github.com/microsoft/autogen under the MIT License.
+// SPDX-License-Identifier: MIT
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // ChatCompletionRequest.cs
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -14,7 +20,7 @@ public class ChatCompletionRequest
     public List<ChatMessage> Messages { get; set; }
 
     [JsonPropertyName("system")]
-    public string? SystemMessage { get; set; }
+    public SystemMessage[]? SystemMessage { get; set; }
 
     [JsonPropertyName("max_tokens")]
     public int MaxTokens { get; set; }
@@ -47,6 +53,26 @@ public class ChatCompletionRequest
     {
         Messages = new List<ChatMessage>();
     }
+}
+
+public class SystemMessage
+{
+    [JsonPropertyName("text")]
+    public string? Text { get; set; }
+
+    [JsonPropertyName("type")]
+    public string? Type { get; private set; } = "text";
+
+    [JsonPropertyName("cache_control")]
+    public CacheControl? CacheControl { get; set; }
+
+    public static SystemMessage CreateSystemMessage(string systemMessage) => new() { Text = systemMessage };
+
+    public static SystemMessage CreateSystemMessageWithCacheControl(string systemMessage) => new()
+    {
+        Text = systemMessage,
+        CacheControl = new CacheControl { Type = CacheControlType.Ephemeral }
+    };
 }
 
 public class ChatMessage

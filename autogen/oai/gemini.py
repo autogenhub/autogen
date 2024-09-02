@@ -221,10 +221,9 @@ class GeminiClient:
                 )
                 genai.configure(api_key=self.api_key)
                 chat = model.start_chat(history=gemini_messages[:-1])
-            
-            response = chat.send_message(
-                        gemini_messages[-1].parts, stream=stream, safety_settings=safety_settings
-                    )
+
+            response = chat.send_message(gemini_messages[-1].parts, stream=stream, safety_settings=safety_settings)
+            ans: str = chat.history[-1].parts[0].text
             prompt_tokens = model.count_tokens(chat.history[:-1]).total_tokens
             completion_tokens = model.count_tokens(ans).total_tokens
         elif model_name == "gemini-pro-vision":

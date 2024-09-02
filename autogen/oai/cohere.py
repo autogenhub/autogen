@@ -172,7 +172,7 @@ class CohereClient:
         # Stream if in parameters
         streaming = True if "stream" in params and params["stream"] else False
         cohere_finish = ""
-
+        tool_calls = None
         ans = None
         if streaming:
             response = client.chat_stream(**cohere_params)
@@ -204,11 +204,9 @@ class CohereClient:
             prompt_tokens = event.response.meta.tokens.input_tokens
             completion_tokens = event.response.meta.tokens.output_tokens
             total_tokens = prompt_tokens + completion_tokens
-
             response_id = event.response.response_id
         else:
             response = client.chat(**cohere_params)
-            # Non-streaming finished
             ans: str = response.text
 
             # Not using billed_units, but that may be better for cost purposes
@@ -217,49 +215,29 @@ class CohereClient:
             total_tokens = prompt_tokens + completion_tokens
 
             response_id = response.response_id
-            
+            # If we have tool calls as the response, populate completed tool calls for our return OAI response
+            if response.tool_calls is not None:
+                cohere_finish = "tool_calls"
+                tool_calls = []
+                for tool_call in response.tool_calls:
 
-        if response is not None:
+                    # if parameters are null, clear them out (Cohere can return a string "null" if no parameter values)
 
-            response_content = ans
-
-            if streaming:
-                # Streaming response
-                if cohere_finish == "":
-                    cohere_finish = "stop"
-                    tool_calls = None
-            else:
-                # Non-streaming response
-                # If we have tool calls as the response, populate completed tool calls for our return OAI response
-                if response.tool_calls is not None:
-                    cohere_finish = "tool_calls"
-                    tool_calls = []
-                    for tool_call in response.tool_calls:
-
-                        # if parameters are null, clear them out (Cohere can return a string "null" if no parameter values)
-
-                        tool_calls.append(
-                            ChatCompletionMessageToolCall(
-                                id=str(random.randint(0, 100000)),
-                                function={
-                                    "name": tool_call.name,
-                                    "arguments": (
-                                        "" if tool_call.parameters is None else json.dumps(tool_call.parameters)
-                                    ),
-                                },
-                                type="function",
-                            )
+                    tool_calls.append(
+                        ChatCompletionMessageToolCall(
+                            id=str(random.randint(0, 100000)),
+                            function={
+                                "name": tool_call.name,
+                                "arguments": ("" if tool_call.parameters is None else json.dumps(tool_call.parameters)),
+                            },
+                            type="function",
                         )
-                else:
-                    cohere_finish = "stop"
-                    tool_calls = None
-        else:
-            raise RuntimeError(f"Failed to get response from Cohere after retrying {attempt + 1} times.")
+                    )
 
         # 3. convert output
         message = ChatCompletionMessage(
             role="assistant",
-            content=response_content,
+            content=ans,
             function_call=None,
             tool_calls=tool_calls,
         )

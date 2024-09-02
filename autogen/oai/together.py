@@ -173,26 +173,21 @@ class TogetherClient:
             prompt_tokens = response.usage.prompt_tokens
             completion_tokens = response.usage.completion_tokens
             total_tokens = response.usage.total_tokens
-            
-        if response is not None:
-            # If we have tool calls as the response, populate completed tool calls for our return OAI response
-            if response.choices[0].finish_reason == "tool_calls":
-                together_finish = "tool_calls"
-                tool_calls = []
-                for tool_call in response.choices[0].message.tool_calls:
-                    tool_calls.append(
-                        ChatCompletionMessageToolCall(
-                            id=tool_call.id,
-                            function={"name": tool_call.function.name, "arguments": tool_call.function.arguments},
-                            type="function",
-                        )
-                    )
-            else:
-                together_finish = "stop"
-                tool_calls = None
 
+        if response.choices[0].finish_reason == "tool_calls":
+            together_finish = "tool_calls"
+            tool_calls = []
+            for tool_call in response.choices[0].message.tool_calls:
+                tool_calls.append(
+                    ChatCompletionMessageToolCall(
+                        id=tool_call.id,
+                        function={"name": tool_call.function.name, "arguments": tool_call.function.arguments},
+                        type="function",
+                    )
+                )
         else:
-            raise RuntimeError(f"Failed to get response from Together.AI after retrying {attempt + 1} times.")
+            together_finish = "stop"
+            tool_calls = None
 
         # 3. convert output
         message = ChatCompletionMessage(

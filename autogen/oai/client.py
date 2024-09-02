@@ -49,8 +49,10 @@ else:
     ERROR = None
 
 try:
-    from autogen.oai.gemini import GeminiClient
     from google.api_core.exceptions import InternalServerError, ResourceExhausted
+
+    from autogen.oai.gemini import GeminiClient
+
     gemini_import_exception: Optional[ImportError] = None
 except ImportError as e:
     InternalServerError = ResourceExhausted = None
@@ -759,7 +761,7 @@ class OpenAIWrapper:
                     raise TimeoutError(
                         "OpenAI API call timed out. This could be due to congestion or too small a timeout value. The timeout can be specified by setting the 'timeout' value (in seconds) in the llm_config (if you are using agents) or the OpenAIWrapper constructor (if you are using the OpenAIWrapper directly)."
                     ) from err
-            except (InternalServerError, ResourceExhausted) as err:
+            except (InternalServerError, ResourceExhausted):
                 logger.debug(f"config {i} failed", exc_info=True)
                 if i == last:
                     raise

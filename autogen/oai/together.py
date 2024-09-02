@@ -157,32 +157,23 @@ class TogetherClient:
         completion_tokens = 0
         total_tokens = 0
 
-        max_retries = 5
-        for attempt in range(max_retries):
-            ans = None
-            try:
-                response = client.chat.completions.create(**together_params)
-            except Exception as e:
-                raise RuntimeError(f"Together.AI exception occurred: {e}")
-            else:
+        response = client.chat.completions.create(**together_params)
+        if together_params["stream"]:
+            # Read in the chunks as they stream
+            ans = ""
+            for chunk in response:
+                ans = ans + (chunk.choices[0].delta.content or "")
 
-                if together_params["stream"]:
-                    # Read in the chunks as they stream
-                    ans = ""
-                    for chunk in response:
-                        ans = ans + (chunk.choices[0].delta.content or "")
+            prompt_tokens = chunk.usage.prompt_tokens
+            completion_tokens = chunk.usage.completion_tokens
+            total_tokens = chunk.usage.total_tokens
+        else:
+            ans: str = response.choices[0].message.content
 
-                    prompt_tokens = chunk.usage.prompt_tokens
-                    completion_tokens = chunk.usage.completion_tokens
-                    total_tokens = chunk.usage.total_tokens
-                else:
-                    ans: str = response.choices[0].message.content
-
-                    prompt_tokens = response.usage.prompt_tokens
-                    completion_tokens = response.usage.completion_tokens
-                    total_tokens = response.usage.total_tokens
-                break
-
+            prompt_tokens = response.usage.prompt_tokens
+            completion_tokens = response.usage.completion_tokens
+            total_tokens = response.usage.total_tokens
+            
         if response is not None:
             # If we have tool calls as the response, populate completed tool calls for our return OAI response
             if response.choices[0].finish_reason == "tool_calls":

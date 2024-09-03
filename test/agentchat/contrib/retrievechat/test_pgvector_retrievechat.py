@@ -1,3 +1,9 @@
+# Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Portions derived from  https://github.com/microsoft/autogen are under the MIT License.
+# SPDX-License-Identifier: MIT
 #!/usr/bin/env python3 -m pytest
 
 import os
@@ -6,8 +12,7 @@ import sys
 import pytest
 from sentence_transformers import SentenceTransformer
 
-from autogen import config_list_from_json
-from autogen.agentchat.contrib.retrieve_assistant_agent import RetrieveAssistantAgent
+from autogen import AssistantAgent, config_list_from_json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../.."))
 from conftest import skip_openai  # noqa: E402
@@ -18,9 +23,6 @@ from test_assistant_agent import KEY_LOC, OAI_CONFIG_LIST  # noqa: E402
 try:
     import pgvector
 
-    from autogen.agentchat.contrib.retrieve_assistant_agent import (
-        RetrieveAssistantAgent,
-    )
     from autogen.agentchat.contrib.retrieve_user_proxy_agent import (
         RetrieveUserProxyAgent,
     )
@@ -46,7 +48,7 @@ def test_retrievechat():
         file_location=KEY_LOC,
     )
 
-    assistant = RetrieveAssistantAgent(
+    assistant = AssistantAgent(
         name="assistant",
         system_message="You are a helpful assistant.",
         llm_config={

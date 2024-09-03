@@ -1,3 +1,9 @@
+# Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+# Portions derived from  https://github.com/microsoft/autogen are under the MIT License.
+# SPDX-License-Identifier: MIT
 import os
 import platform
 
@@ -88,26 +94,27 @@ extra_require = {
     "types": ["mypy==1.9.0", "pytest>=6.1.1,<8"] + jupyter_executor,
     "long-context": ["llmlingua<0.3"],
     "anthropic": ["anthropic>=0.23.1"],
-    "mistral": ["mistralai>=0.2.0"],
+    "mistral": ["mistralai>=1.0.1"],
     "groq": ["groq>=0.9.0"],
     "cohere": ["cohere>=5.5.8"],
+    "bedrock": ["boto3>=1.34.149"],
 }
 
 setuptools.setup(
     name="pyautogen",
     version=__version__,
-    author="AutoGen",
+    author="Chi Wang & Qingyun Wu",
     author_email="auto-gen@outlook.com",
-    description="Enabling Next-Gen LLM Applications via Multi-Agent Conversation Framework",
+    description="A programming framework for agentic AI",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/microsoft/autogen",
+    url="https://github.com/autogen-ai/autogen",
     packages=setuptools.find_packages(include=["autogen*"], exclude=["test"]),
     install_requires=install_requires,
     extras_require=extra_require,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: Apache License 2.0",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.8,<3.13",

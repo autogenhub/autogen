@@ -8,13 +8,14 @@
 
 [![NuGet version](https://badge.fury.io/nu/AutoGen.Core.svg)](https://badge.fury.io/nu/AutoGen.Core)
 
-# AutoGen
+# [AutoGen](https://github.com/autogen-ai/autogen)
+
 [📚 Cite paper](#related-papers).
 <!-- <p align="center">
     <img src="https://github.com/autogen-ai/autogen/blob/main/website/static/img/flaml.svg"  width=200>
     <br>
 </p> -->
-:fire: Sep 06, 2024: AutoGen now available as `autogen` on PyPI! We're excited to announce a more convenient package name for AutoGen: Starting with version 0.3.0, you can now install AutoGen using:
+:fire: :tada: Sep 06, 2024: AutoGen now available as `autogen` on PyPI! We're excited to announce a more convenient package name for AutoGen: Starting with version 0.3.0, you can now install AutoGen using:
 ```
 pip install autogen
 ```
@@ -22,6 +23,8 @@ We extend our sincere gratitude to Simon Mackenzie for generously transferring t
 
 **Note:** The previous package name `pyautogen` will remain valid for a transitional period. However, we encourage users to switch to the new, more intuitive `autogen` package name, as `pyautogen` will eventually be deprecated.
 
+📄 **License Change:**
+With this new release and package name, we are officially switching to the Apache 2.0 license. This enhances our commitment to open-source collaboration while providing additional protections for contributors and users alike.
 
 :fire: Aug 24, 2024: A new organization [autogen-ai](https://github.com/autogen-ai) is created to host the development of AutoGen and related projects with open governance. We invite collaborators from all organizations and individuals.
 
@@ -185,7 +188,7 @@ After the repo is cloned.
 The figure below shows an example conversation flow with AutoGen.
 ![Agent Chat Example](https://github.com/autogen-ai/autogen/blob/main/website/static/img/chat_example.png)
 
-Alternatively, the [sample code](https://github.com/autogen-ai/autogen/blob/main/samples/simple_chat.py) here allows a user to chat with an AutoGen agent in ChatGPT style.
+Alternatively, the [sample code](https://github.com/autogen-ai/build-with-autogen/blob/main/samples/simple_chat.py) here allows a user to chat with an AutoGen agent in ChatGPT style.
 Please find more [code examples](https://autogen-ai.github.io/autogen/docs/Examples#automated-multi-agent-chat) for this feature.
 
 <p align="right" style="font-size: 14px; color: #555; margin-top: 20px;">
@@ -240,6 +243,12 @@ In addition, you can find:
     ↑ Back to Top ↑
   </a>
 </p>
+
+## CookBook
+
+Explore detailed implementations with sample code and applications to help you get started with AutoGen.
+[Cookbook](https://github.com/autogen-ai/build-with-autogen)
+
 
 ## Related Papers
 

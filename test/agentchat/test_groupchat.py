@@ -2067,6 +2067,7 @@ def test_manager_resume_messages():
     with pytest.raises(Exception):
         return_agent, return_message = manager.resume(messages="Let's get this conversation started.")
 
+
 def test_select_speaker_transform_messages():
     """Tests adding transform messages to a GroupChat for speaker selection when in 'auto' mode"""
 
@@ -2105,6 +2106,7 @@ def test_select_speaker_transform_messages():
     )
 
     assert groupchat_none._speaker_selection_transforms is None
+
 
 def test_manager_resume_message_assignment():
     """Tests that the messages passed in are assigned to agents correctly"""
@@ -2149,6 +2151,7 @@ def test_manager_resume_message_assignment():
 
     # Compare agent_a's message state to previous messages (excludes last message)
     assert list(agent_a.chat_messages.values())[0] == prev_messages[:-1]
+
 
 if __name__ == "__main__":
     # test_func_call_groupchat()

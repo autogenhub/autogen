@@ -172,7 +172,7 @@ class CohereClient:
 
         # Stream if in parameters
         streaming = True if "stream" in params and params["stream"] else False
-        cohere_finish = ""
+        cohere_finish = "stop"
         tool_calls = None
         ans = None
         if streaming:

@@ -11,6 +11,18 @@ from typing import Dict, List, Union
 
 import tiktoken
 
+try:
+    from autogen.agentchat.contrib.img_utils import num_tokens_from_gpt_image
+
+    img_util_imported = True
+except ImportError:
+
+    def num_tokens_from_gpt_image(_):
+        return 0
+
+    img_util_imported = False
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -143,6 +155,23 @@ def _num_token_from_messages(messages: Union[List, Dict], model="gpt-3.5-turbo-0
         num_tokens += tokens_per_message
         for key, value in message.items():
             if value is None:
+                continue
+
+            # handle content if images are in GPT-4-vision
+            if key == "content" and isinstance(value, list):
+                for part in value:
+                    if not isinstance(part, dict) or "type" not in part:
+                        continue
+                    if part["type"] == "text":
+                        num_tokens += len(encoding.encode(part["text"]))
+                    if "image_url" in part:
+                        assert "url" in part["image_url"]
+                        if not img_util_imported:
+                            logger.warning(
+                                "img_utils or PIL not imported. Skipping image token count."
+                                "Please install autogen with [lmm] option.",
+                            )
+                        num_tokens += num_tokens_from_gpt_image(part["image_url"]["url"])
                 continue
 
             # function calls

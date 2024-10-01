@@ -9,6 +9,7 @@ from .docker_commandline_code_executor import DockerCommandLineCodeExecutor
 from .factory import CodeExecutorFactory
 from .local_commandline_code_executor import LocalCommandLineCodeExecutor
 from .markdown_code_extractor import MarkdownCodeExtractor
+from .kubernetes_commandline_code_executor import KubernetesCommandLineCodeExecutor
 
 __all__ = (
     "CodeBlock",
@@ -19,4 +20,5 @@ __all__ = (
     "MarkdownCodeExtractor",
     "LocalCommandLineCodeExecutor",
     "DockerCommandLineCodeExecutor",
+    "KubernetesCommandLineCodeExecutor",
 )

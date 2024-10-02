@@ -168,6 +168,14 @@ def get_agent_node_id(agent: LogAgent) -> str:
     return f"{agent.id}_{agent.visualization_params['index']}"
 
 
+def format_tooltip(tooltip: str) -> str:
+    """Validates that a tooltip is valid, particularly the length which can't be more than 16K"""
+    if len(tooltip) > 16384:
+        return tooltip[:16384]
+    else:
+        return tooltip
+
+
 def add_node_start(design_config: Dict, dot: Digraph):
 
     dot.node(
@@ -232,11 +240,11 @@ def add_node_summary(design_config: Dict, dot: Digraph, eventflow: Union[LogEven
     )
 
 
-def add_node_terminate(design_config: Dict, dot: Digraph, event: LogEvent):
+def add_node_terminate(design_config: Dict, dot: Digraph, eventflow: Union[LogEvent | LogFlow]):
     """Add a termination node to the diagram"""
 
     dot.node(
-        event.event_id,
+        _get_eventflow_id(eventflow),
         "Termination",
         shape=design_config["node_shape"]["terminate"],
         color=design_config["border_color"],
@@ -259,7 +267,7 @@ def add_node_code_execution(
         event.event_id,
         "Code Execution",
         shape=design_config["node_shape"]["code_execution"],
-        tooltip=tooltip_text,
+        tooltip=format_tooltip(tooltip_text),
         href_text=href_text,
         color=edge_color,
         style="filled",
@@ -389,7 +397,7 @@ def add_agent_to_agent_edge(
         get_agent_node_id(sender_agent),
         get_agent_node_id(recipient_agent),
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         dir=dir,
         labeldistance=design_config["label_distance"],
@@ -415,7 +423,7 @@ def add_agent_to_eventflow_edge(
         get_agent_node_id(agent),
         _get_eventflow_id(eventflow),
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],
@@ -439,7 +447,7 @@ def add_agent_to_info_edge(
         get_agent_node_id(agent),
         node_id,
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],
@@ -463,7 +471,7 @@ def add_eventflow_to_eventflow_edge(
         _get_eventflow_id(eventflow_one),
         _get_eventflow_id(eventflow_two),
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],
@@ -487,7 +495,7 @@ def add_eventflow_to_node_edge(
         _get_eventflow_id(eventflow),
         node_id,
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],
@@ -511,7 +519,7 @@ def add_event_to_agent_edge(
         event.event_id,
         get_agent_node_id(agent),
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],
@@ -535,7 +543,7 @@ def add_invocation_to_agent_return_edge(
         get_agent_node_id(agent),
         invocation.invocation_id,
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],
@@ -560,7 +568,7 @@ def add_invocation_to_eventflow_return_edge(
         _get_eventflow_id(eventflow),
         invocation.invocation_id,
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],
@@ -585,7 +593,7 @@ def add_eventflow_to_agent_return_edge(
         get_agent_node_id(agent),
         _get_eventflow_id(eventflow),
         label=edge_text,
-        labeltooltip=tooltip_text,
+        labeltooltip=format_tooltip(tooltip_text),
         labelhref=href_text,
         labeldistance=design_config["label_distance"],
         fontcolor=design_config["font_color"],

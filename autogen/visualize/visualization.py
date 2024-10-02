@@ -729,7 +729,7 @@ class Visualize:
 
                 i += 1
 
-            return i
+            return i, None
 
         # Initialize the main diagram
         dot = Digraph()

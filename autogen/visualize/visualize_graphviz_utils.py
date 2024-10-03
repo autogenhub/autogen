@@ -14,7 +14,7 @@ from uuid import uuid4
 
 from graphviz import Digraph
 
-from .visualise_log_classes import LogAgent, LogClient, LogEvent, LogFlow, LogInvocation
+from .visualize_base import LogAgent, LogClient, LogEvent, LogFlow, LogInvocation
 
 # for * imports, import all functions
 __all__ = [

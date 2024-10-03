@@ -12,9 +12,8 @@ from uuid import uuid4
 from graphviz import Digraph
 
 from ..logger import FileLogger, SqliteLogger
-from .visualise_log_classes import LogAgent, LogClient, LogEvent, LogFlow, LogInvocation, LogSession
-from .visualise_process_log import load_log_file
-from .visualise_utils import (
+from .visualize_base import LogAgent, LogClient, LogEvent, LogFlow, LogInvocation, LogSession
+from .visualize_graphviz_utils import (
     add_agent_to_agent_edge,
     add_agent_to_eventflow_edge,
     add_agent_to_info_edge,
@@ -43,6 +42,7 @@ from .visualise_utils import (
     gcm_id_by_groupchat,
     truncate_string,
 )
+from .visualize_log_utils import load_log_file
 
 
 class Visualize:

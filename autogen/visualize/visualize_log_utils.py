@@ -7,7 +7,7 @@
 import json
 from typing import Any, Dict, List, Union
 
-from .visualise_log_classes import LogAgent, LogClient, LogEvent, LogFlow, LogInvocation, LogSession
+from .visualize_base import LogAgent, LogClient, LogEvent, LogFlow, LogInvocation, LogSession
 
 
 def parse_log_line(line_data: Dict) -> Union[LogSession, LogClient, LogEvent, LogFlow, LogAgent, LogInvocation, None]:

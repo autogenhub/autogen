@@ -1,16 +1,13 @@
 from __future__ import annotations
 
 import atexit
-import base64
-import logging
+import shlex
 import sys
 import time
 import uuid
 from hashlib import md5
 from pathlib import Path
 from typing import Any, ClassVar, Dict, List, Optional, Tuple, Type, Union
-
-import shlex
 
 from kubernetes import client, config, stream
 from kubernetes.client.exceptions import ApiException
@@ -55,19 +52,11 @@ class KubernetesCommandLineCodeExecutor(CodeExecutor):
         """(Experimental) A code executor class that executes code through
         a command line environment in a Kubernetes pod.
 
-        The executor first saves each code block in a file in the pod's workspace,
-        and then executes the code file in the pod.
-        The executor executes the code blocks in the order they are received.
-        Currently, the executor only supports Python and shell scripts.
-        For Python code, use the language "python" for the code block.
-        For shell scripts, use the language "bash", "shell", or "sh" for the code
-        block.
-
         Args:
             image (str, optional): Docker image to use for code execution.
                 Defaults to "python:3-slim".
-            pod_name (Optional[str], optional): Name of the Kubernetes pod
-                which is created. If None, will autogenerate a name. Defaults to None.
+            pod_name (Optional[str], optional): Name of the Kubernetes pod.
+                If None, will autogenerate a name. Defaults to None.
             namespace (str, optional): Kubernetes namespace to create the pod in.
                 Defaults to "default".
             timeout (int, optional): The timeout for code execution. Defaults to 60.
@@ -106,6 +95,17 @@ class KubernetesCommandLineCodeExecutor(CodeExecutor):
         # Create Kubernetes API client
         self.api_instance = client.CoreV1Api()
 
+        # Create the pod
+        self._create_pod()
+
+        def cleanup() -> None:
+            self.stop()
+            atexit.unregister(cleanup)
+
+        atexit.register(cleanup)
+        self._cleanup = cleanup
+
+    def _create_pod(self) -> None:
         # Define the pod spec
         pod = client.V1Pod(
             metadata=client.V1ObjectMeta(name=self.pod_name),
@@ -113,50 +113,26 @@ class KubernetesCommandLineCodeExecutor(CodeExecutor):
                 containers=[
                     client.V1Container(
                         name="executor",
-                        image=image,
+                        image=self.image,
                         command=["/bin/sh"],
                         tty=True,
                         stdin=True,
-                        volume_mounts=[
-                            client.V1VolumeMount(
-                                mount_path="/workspace",
-                                name="workspace-volume"
-                            )
-                        ]
+                        volume_mounts=[client.V1VolumeMount(mount_path="/workspace", name="workspace-volume")],
                     )
                 ],
-                volumes=[
-                    client.V1Volume(
-                        name="workspace-volume",
-                        empty_dir=client.V1EmptyDirVolumeSource()
-                    )
-                ],
-                restart_policy="Never"
-            )
+                volumes=[client.V1Volume(name="workspace-volume", empty_dir=client.V1EmptyDirVolumeSource())],
+                restart_policy="Never",
+            ),
         )
 
         # Create the pod
         try:
-            self.api_instance.create_namespaced_pod(
-                namespace=self.namespace,
-                body=pod
-            )
+            self.api_instance.create_namespaced_pod(namespace=self.namespace, body=pod)
         except ApiException as e:
             raise ValueError(f"Failed to create pod: {e}")
 
         # Wait for the pod to be running
-        self._wait_for_pod_ready(timeout)
-
-        def cleanup() -> None:
-            try:
-                self.api_instance.delete_namespaced_pod(name=self.pod_name, namespace=self.namespace)
-            except ApiException as e:
-                if e.status != 404:
-                    raise e
-            atexit.unregister(cleanup)
-
-        atexit.register(cleanup)
-        self._cleanup = cleanup
+        self._wait_for_pod_ready(self._timeout)
 
     def _wait_for_pod_ready(self, timeout: int = 60) -> None:
         start_time = time.time()
@@ -214,7 +190,7 @@ class KubernetesCommandLineCodeExecutor(CodeExecutor):
 
             # Determine filename
             try:
-                filename = _get_file_name_from_content(code, Path('/workspace'))
+                filename = _get_file_name_from_content(code, Path("/workspace"))
             except ValueError:
                 outputs.append("Filename is not in the workspace")
                 last_exit_code = 1
@@ -245,15 +221,17 @@ class KubernetesCommandLineCodeExecutor(CodeExecutor):
         return CommandLineCodeResult(exit_code=last_exit_code, output="".join(outputs), code_file=code_file)
 
     def _upload_file_to_pod(self, content: str, remote_path: str) -> None:
-        exec_command = ['sh', '-c', f'cat > {shlex.quote(remote_path)}']
+        exec_command = ["sh", "-c", f"cat > {shlex.quote(remote_path)}"]
         resp = stream.stream(
             self.api_instance.connect_get_namespaced_pod_exec,
             name=self.pod_name,
             namespace=self.namespace,
             command=exec_command,
-            stderr=True, stdin=True,
-            stdout=True, tty=False,
-            _preload_content=False
+            stderr=True,
+            stdin=True,
+            stdout=True,
+            tty=False,
+            _preload_content=False,
         )
         try:
             resp.write_stdin(content)
@@ -264,67 +242,65 @@ class KubernetesCommandLineCodeExecutor(CodeExecutor):
         resp.close()
 
     def _exec_command_with_exit_code(self, command: List[str]) -> Tuple[int, str]:
-      cmd_str = ' '.join(shlex.quote(arg) for arg in command)
-      # Wrap the command to capture the exit code
-      wrapped_command = ['sh', '-c', f'{cmd_str}; echo $?']
-      try:
-          resp = stream.stream(
-              self.api_instance.connect_get_namespaced_pod_exec,
-              name=self.pod_name,
-              namespace=self.namespace,
-              command=wrapped_command,
-              stderr=True,
-              stdin=False,
-              stdout=True,
-              tty=False,
-              _preload_content=False,
-              _request_timeout=self._timeout  # Set the timeout here
-          )
-          output = ""
-          while resp.is_open():
-              resp.update(timeout=1)
-              if resp.peek_stdout():
-                  output += resp.read_stdout()
-              if resp.peek_stderr():
-                  output += resp.read_stderr()
-          resp.close()
-      except Exception as e:
-          # Handle timeout exception
-          if isinstance(e, ApiException) and e.status == 504:
-              output += "\n" + TIMEOUT_MSG
-              exit_code = 124  # Similar to Unix timeout exit code
-          else:
-              raise e
-      else:
-          # Parse the exit code from the output
-          output_lines = output.strip().splitlines()
-          if output_lines:
-              exit_code_str = output_lines[-1]
-              try:
-                  exit_code = int(exit_code_str)
-                  output = '\n'.join(output_lines[:-1])
-              except ValueError:
-                  # Could not parse exit code
-                  exit_code = 1
-          else:
-              exit_code = 1
-      return exit_code, output
+        cmd_str = " ".join(shlex.quote(arg) for arg in command)
+        # Wrap the command to capture the exit code
+        wrapped_command = ["sh", "-c", f"{cmd_str}; echo $?"]
+        try:
+            resp = stream.stream(
+                self.api_instance.connect_get_namespaced_pod_exec,
+                name=self.pod_name,
+                namespace=self.namespace,
+                command=wrapped_command,
+                stderr=True,
+                stdin=False,
+                stdout=True,
+                tty=False,
+                _preload_content=False,
+                _request_timeout=self._timeout,  # Set the timeout here
+            )
+            output = ""
+            while resp.is_open():
+                resp.update(timeout=1)
+                if resp.peek_stdout():
+                    output += resp.read_stdout()
+                if resp.peek_stderr():
+                    output += resp.read_stderr()
+            resp.close()
+        except Exception as e:
+            # Handle timeout exception
+            if isinstance(e, ApiException) and e.status == 504:
+                output += "\n" + TIMEOUT_MSG
+                exit_code = 124  # Similar to Unix timeout exit code
+            else:
+                raise e
+        else:
+            # Parse the exit code from the output
+            output_lines = output.strip().splitlines()
+            if output_lines:
+                exit_code_str = output_lines[-1]
+                try:
+                    exit_code = int(exit_code_str)
+                    output = "\n".join(output_lines[:-1])
+                except ValueError:
+                    # Could not parse exit code
+                    exit_code = 1
+            else:
+                exit_code = 1
+        return exit_code, output
 
     def restart(self) -> None:
         """(Experimental) Restart the code executor."""
         self.stop()
         # Recreate the pod
-        self.__init__(
-            image=self.image,
-            pod_name=self.pod_name,
-            namespace=self.namespace,
-            timeout=self._timeout,
-            execution_policies=self.execution_policies
-        )
+        self._create_pod()
 
     def stop(self) -> None:
         """(Experimental) Stop the code executor."""
-        self._cleanup()
+        try:
+            self.api_instance.delete_namespaced_pod(name=self.pod_name, namespace=self.namespace)
+        except ApiException as e:
+            if e.status != 404:
+                raise e
 
     def __enter__(self) -> Self:
         return self

@@ -122,14 +122,12 @@ def parse_tags_from_content(
         content (Union[str, List[Dict[str, Any]]]): The message content to parse. Can be a string or a list of content
             items.
         strict_filepath_match (bool, optional): If False (default), the parser will match all characters between the tag opening
-            and closing, including quotation marks and empty spaces. If True, the parser will stop at the first quotation mark
-            it encounters. Use True when dealing with nested quotes or complex attribute values. If there are
-            lots of HTML tag in the content, it is recommended to set this to True, because then it will only match
-            the only one tag, and will ignore HTML tags in the content.
+            and closing, including quotation marks and spaces. If True, the parser will only match simple tag contents
+            without spaces or quotes. This is useful for parsing filenames or URLs and ignoring complex HTML-like structures.
 
     Returns:
-        List[Dict[str, str]]: A list of dictionaries, where each dictionary represents a parsed tag. Each dictionary
-            contains three key-value pairs: 'type' which is the tag, 'attr' which is a dictionary of the parsed attributes,
+        List[Dict[str, Union[str, Dict[str, str], re.Match]]]: A list of dictionaries, where each dictionary represents a parsed tag. Each dictionary
+            contains three key-value pairs: 'tag' which is the tag name, 'attr' which is a dictionary of the parsed attributes,
             and 'match' which is a regular expression match object.
 
     Raises:

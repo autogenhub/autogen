@@ -77,6 +77,16 @@ TAG_PARSING_TESTS = [
         "strict_filepath_match": True,
         "expected": [{"tag": "img", "attr": {"src": "http://example.com/image.png"}}],
     },
+    {
+        "message": 'Can you generate this audio? <audio text="Hello I\'m a robot" prompt="whisper">',
+        "strict_filepath_match": True,
+        "expected": [],  # Empty because strict_filepath_match=True doesn't match tags with spaces or quotes
+    },
+    {
+        "message": 'Complex nested quotes <img src="http://example.com/image.png" alt="A "quoted" description">',
+        "strict_filepath_match": True,
+        "expected": [],  # Empty because strict_filepath_match=True doesn't match tags with spaces or quotes
+    },
 ]
 
 

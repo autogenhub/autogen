@@ -97,6 +97,23 @@ def test_num_tokens_from_gpt_image():
     # the image token is: 85 + 170 = 255
     assert tokens == 34 + 255
 
+    # Test low quality
+    messages = [
+        {
+            "role": "system",
+            "content": "you are a helpful assistant. af3758 *3 33(3)",
+        },
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "hello asdfjj qeweee"},
+                {"type": "image_url", "image_url": {"url": base64_encoded_image, "detail": "low"}},
+            ],
+        },
+    ]
+    tokens = count_token(messages, model="gpt-4o")
+    assert tokens == 34 + 85
+
 
 def test_count_token():
     messages = [

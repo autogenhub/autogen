@@ -17,13 +17,14 @@ try:
     img_util_imported = True
 except ImportError:
 
-    def num_tokens_from_gpt_image(_):
+    def num_tokens_from_gpt_image(*args, **kwargs):
         return 0
 
     img_util_imported = False
 
 
 logger = logging.getLogger(__name__)
+logger.img_dependency_warned = False  # member variable to track if the warning has been logged
 
 
 def get_max_token_limit(model: str = "gpt-3.5-turbo-0613") -> int:
@@ -125,6 +126,13 @@ def _num_token_from_messages(messages: Union[List, Dict], model="gpt-3.5-turbo-0
         "gpt-4-32k-0314",
         "gpt-4-0613",
         "gpt-4-32k-0613",
+        "gpt-4-turbo-preview",
+        "gpt-4-vision-preview",
+        "gpt-4o",
+        "gpt-4o-2024-05-13",
+        "gpt-4o-2024-08-06",
+        "gpt-4o-mini",
+        "gpt-4o-mini-2024-07-18",
     }:
         tokens_per_message = 3
         tokens_per_name = 1
@@ -166,12 +174,19 @@ def _num_token_from_messages(messages: Union[List, Dict], model="gpt-3.5-turbo-0
                         num_tokens += len(encoding.encode(part["text"]))
                     if "image_url" in part:
                         assert "url" in part["image_url"]
-                        if not img_util_imported:
+                        if not img_util_imported and not logger.img_dependency_warned:
                             logger.warning(
                                 "img_utils or PIL not imported. Skipping image token count."
                                 "Please install autogen with [lmm] option.",
                             )
-                        num_tokens += num_tokens_from_gpt_image(part["image_url"]["url"])
+                            logger.img_dependency_warned = True
+                        is_low_quality = "detail" in part["image_url"] and part["image_url"]["detail"] == "low"
+                        try:
+                            num_tokens += num_tokens_from_gpt_image(
+                                image_data=part["image_url"]["url"], model=model, low_quality=is_low_quality
+                            )
+                        except ValueError as e:
+                            logger.warning(f"Error in num_tokens_from_gpt_image: {e}")
                 continue
 
             # function calls

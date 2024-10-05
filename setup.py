@@ -47,9 +47,7 @@ jupyter_executor = [
     "ipykernel>=6.29.0",
 ]
 
-kubernetes_executor = [
-  "kubernetes"
-]
+kubernetes_executor = ["kubernetes"]
 
 retrieve_chat = [
     "protobuf==4.25.3",

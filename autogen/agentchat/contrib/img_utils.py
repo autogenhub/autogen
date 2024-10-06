@@ -17,6 +17,25 @@ from PIL import Image
 
 from autogen.agentchat import utils
 
+# Parameters for token counting for images for different models
+MODEL_PARAMS = {
+    "gpt-4-vision": {
+        "max_edge": 2048,
+        "min_edge": 768,
+        "tile_size": 512,
+        "base_token_count": 85,
+        "token_multiplier": 170,
+    },
+    "gpt-4o-mini": {
+        "max_edge": 2048,
+        "min_edge": 768,
+        "tile_size": 512,
+        "base_token_count": 2833,
+        "token_multiplier": 5667,
+    },
+    "gpt-4o": {"max_edge": 2048, "min_edge": 768, "tile_size": 512, "base_token_count": 85, "token_multiplier": 170},
+}
+
 
 def get_pil_image(image_file: Union[str, Image.Image]) -> Image.Image:
     """
@@ -338,37 +357,34 @@ def num_tokens_from_gpt_image(
     image = get_pil_image(image_data)  # PIL Image
     width, height = image.size
 
-    # Scaling factors and tile sizes may differ depending on the model
+    # Determine model parameters
     if "gpt-4-vision" in model or "gpt-4-turbo" in model or "gpt-4v" in model or "gpt-4-v" in model:
-        max_edge, min_edge, tile_size = 2048, 768, 512
-        base_token_count, token_multiplier = 85, 170
+        params = MODEL_PARAMS["gpt-4-vision"]
     elif "gpt-4o-mini" in model:
-        max_edge, min_edge, tile_size = 2048, 768, 512
-        base_token_count, token_multiplier = 2833, 5667
+        params = MODEL_PARAMS["gpt-4o-mini"]
     elif "gpt-4o" in model:
-        max_edge, min_edge, tile_size = 2048, 768, 512
-        base_token_count, token_multiplier = 85, 170
+        params = MODEL_PARAMS["gpt-4o"]
     else:
         raise ValueError(
             f"Model {model} is not supported. Choose 'gpt-4-vision', 'gpt-4-turbo', 'gpt-4v', 'gpt-4-v', 'gpt-4o', or 'gpt-4o-mini'."
         )
 
     if low_quality:
-        return base_token_count
+        return params["base_token_count"]
 
     # 1. Constrain the longest edge
-    if max(width, height) > max_edge:
-        scale_factor = max_edge / max(width, height)
+    if max(width, height) > params["max_edge"]:
+        scale_factor = params["max_edge"] / max(width, height)
         width, height = int(width * scale_factor), int(height * scale_factor)
 
     # 2. Further constrain the shortest edge
-    if min(width, height) > min_edge:
-        scale_factor = min_edge / min(width, height)
+    if min(width, height) > params["min_edge"]:
+        scale_factor = params["min_edge"] / min(width, height)
         width, height = int(width * scale_factor), int(height * scale_factor)
 
     # 3. Count how many tiles are needed to cover the image
-    tiles_width = ceil(width / tile_size)
-    tiles_height = ceil(height / tile_size)
-    total_tokens = base_token_count + token_multiplier * (tiles_width * tiles_height)
+    tiles_width = ceil(width / params["tile_size"])
+    tiles_height = ceil(height / params["tile_size"])
+    total_tokens = params["base_token_count"] + params["token_multiplier"] * (tiles_width * tiles_height)
 
     return total_tokens

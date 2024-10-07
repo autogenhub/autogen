@@ -51,6 +51,6 @@ class GraphRagCapability(AgentCapability):
         """
         initialize graph rag capability with a graph query engine
         """
-        ...
+        self.query_engine = query_engine
 
     def add_to_agent(self, agent: ConversableAgent): ...

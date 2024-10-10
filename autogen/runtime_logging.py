@@ -144,6 +144,24 @@ def log_new_client(
     autogen_logger.log_new_client(client, wrapper, init_args)
 
 
+def log_new_custom_client(
+    client: Any, wrapper: OpenAIWrapper, init_args: Dict[str, Any], model_client_cls_name: str
+) -> None:
+    if autogen_logger is None:
+        logger.error("[runtime logging] log_new_client: autogen logger is None")
+        return
+
+    autogen_logger.log_new_custom_client(client, wrapper, init_args, model_client_cls_name)
+
+
+def log_flow(source: Union[str, Agent], code_point: str, code_point_id: str, **kwargs: Dict[str, Any]) -> None:
+    if autogen_logger is None:
+        logger.error("[runtime logging] log_new_flow: autogen logger is None")
+        return
+
+    autogen_logger.log_flow(source, code_point, code_point_id, **kwargs)
+
+
 def stop() -> None:
     global is_logging
     if autogen_logger:

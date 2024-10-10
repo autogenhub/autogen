@@ -105,13 +105,28 @@ class BaseLogger(ABC):
         self, client: Union[AzureOpenAI, OpenAI], wrapper: OpenAIWrapper, init_args: Dict[str, Any]
     ) -> None:
         """
-        Log the birth of a new OpenAIWrapper.
+        Log the creation of a new client.
 
         Args:
-            wrapper (OpenAI):           The OpenAI client to log.
-            init_args (dict):           The arguments passed to the construct the client
+            client (AzureOpenAI or OpenAI)  The client class to log
+            wrapper (OpenAIWrapper):        The OpenAIWrapper to log
+            init_args (dict):               The arguments passed to the construct the client
         """
         ...
+
+    @abstractmethod
+    def log_new_custom_client(
+        self, client: Any, wrapper: OpenAIWrapper, init_args: Dict[str, Any], model_client_cls_name: str
+    ) -> None:
+        """
+        Log the creation of a new custom client.
+
+        Args:
+            client (Any):               The client class to log
+            wrapper (OpenAIWrapper):    The OpenAI wrapper to log
+            init_args (dict):           The arguments passed to the construct the client
+            model_client_cls_name:      The custom client class name
+        """
 
     @abstractmethod
     def log_function_use(self, source: Union[str, Agent], function: F, args: Dict[str, Any], returns: Any) -> None:
@@ -123,6 +138,20 @@ class BaseLogger(ABC):
             function (F):               The function information
             args (dict):                The function args to log
             returns (any):              The return
+        """
+
+    @abstractmethod
+    def log_flow(
+        self, source: Union[str, Agent], code_point: str, code_point_id: str, **kwargs: Dict[str, Any]
+    ) -> None:
+        """
+        Log a point in code flow
+
+        Args:
+            source (str or Agent):      The source/creator of the event as a string name or an Agent instance
+            code_point (str):           The code point name
+            code_point_id (str):        A unique id to associated related flow code points
+            kwargs (dict):              The flow information to log
         """
 
     @abstractmethod

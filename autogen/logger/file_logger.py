@@ -17,7 +17,7 @@ from openai import AzureOpenAI, OpenAI
 from openai.types.chat import ChatCompletion
 
 from autogen.logger.base_logger import BaseLogger
-from autogen.logger.logger_utils import get_current_ts, to_dict
+from autogen.logger.logger_utils import get_current_ts, to_dict, try_to_dict
 
 from .base_logger import LLMConfig
 
@@ -139,7 +139,7 @@ class FileLogger(BaseLogger):
                     "session_id": self.session_id,
                     "current_time": get_current_ts(),
                     "agent_type": type(agent).__name__,
-                    "args": to_dict(init_args),
+                    "args": try_to_dict(init_args, ignore_callable=True),
                     "thread_id": thread_id,
                 }
             )
@@ -204,7 +204,7 @@ class FileLogger(BaseLogger):
                 {
                     "wrapper_id": id(wrapper),
                     "session_id": self.session_id,
-                    "json_state": json.dumps(init_args),
+                    "json_state": try_to_dict(init_args),
                     "timestamp": get_current_ts(),
                     "thread_id": thread_id,
                 }
@@ -243,14 +243,38 @@ class FileLogger(BaseLogger):
                     "wrapper_id": id(wrapper),
                     "session_id": self.session_id,
                     "class": type(client).__name__,
-                    "json_state": json.dumps(init_args),
+                    "json_state": try_to_dict(init_args),
                     "timestamp": get_current_ts(),
                     "thread_id": thread_id,
                 }
             )
             self.logger.info(log_data)
         except Exception as e:
-            self.logger.error(f"[file_logger] Failed to log event {e}")
+            self.logger.error(f"[file_logger] Failed to log new client {e}")
+
+    def log_new_custom_client(
+        self, client: Any, wrapper: OpenAIWrapper, init_args: Dict[str, Any], model_client_cls_name: str
+    ) -> None:
+        """
+        Log a new client instance.
+        """
+        thread_id = threading.get_ident()
+
+        try:
+            log_data = json.dumps(
+                {
+                    "client_id": id(client),
+                    "wrapper_id": id(wrapper),
+                    "session_id": self.session_id,
+                    "model_client_class": model_client_cls_name,
+                    "json_state": try_to_dict(init_args),
+                    "timestamp": get_current_ts(),
+                    "thread_id": thread_id,
+                }
+            )
+            self.logger.info(log_data)
+        except Exception as e:
+            self.logger.error(f"[file_logger] Failed to log new custom client class {e}")
 
     def log_function_use(self, source: Union[str, Agent], function: F, args: Dict[str, Any], returns: Any) -> None:
         """
@@ -273,7 +297,53 @@ class FileLogger(BaseLogger):
             )
             self.logger.info(log_data)
         except Exception as e:
-            self.logger.error(f"[file_logger] Failed to log event {e}")
+            self.logger.error(f"[file_logger] Failed to log new function use {e}")
+
+    def log_flow(
+        self, source: Union[str, Agent], code_point: str, code_point_id: str, **kwargs: Dict[str, Any]
+    ) -> None:
+        """
+        Log a point in code flow
+        """
+        from autogen import Agent
+
+        json_args = json.dumps(kwargs, default=lambda o: f"<<non-serializable: {type(o).__qualname__}>>")
+        thread_id = threading.get_ident()
+
+        if isinstance(source, Agent):
+            try:
+                log_data = json.dumps(
+                    {
+                        "source_id": id(source),
+                        "source_name": str(source.name) if hasattr(source, "name") else source,
+                        "agent_module": source.__module__,
+                        "agent_class": source.__class__.__name__,
+                        "code_point": code_point,
+                        "code_point_id": code_point_id,
+                        "info": json_args,
+                        "timestamp": get_current_ts(),
+                        "thread_id": thread_id,
+                    }
+                )
+                self.logger.info(log_data)
+            except Exception as e:
+                self.logger.error(f"[file_logger] Failed to log flow {e}")
+        else:
+            try:
+                log_data = json.dumps(
+                    {
+                        "source_id": id(source),
+                        "source_name": str(source.name) if hasattr(source, "name") else source,
+                        "code_point": code_point,
+                        "code_point_id": code_point_id,
+                        "info": json_args,
+                        "timestamp": get_current_ts(),
+                        "thread_id": thread_id,
+                    }
+                )
+                self.logger.info(log_data)
+            except Exception as e:
+                self.logger.error(f"[file_logger] Failed to log flow {e}")
 
     def get_connection(self) -> None:
         """Method is intentionally left blank because there is no specific connection needed for the FileLogger."""

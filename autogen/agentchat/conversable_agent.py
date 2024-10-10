@@ -38,7 +38,7 @@ from ..formatting_utils import colored
 from ..function_utils import get_function_schema, load_basemodels_if_needed, serialize_to_str
 from ..io.base import IOStream
 from ..oai.client import ModelClient, OpenAIWrapper
-from ..runtime_logging import log_event, log_function_use, log_new_agent, logging_enabled
+from ..runtime_logging import log_event, log_flow, log_function_use, log_new_agent, logging_enabled
 from .agent import Agent, LLMAgent
 from .chat import ChatResult, a_initiate_chats, initiate_chats
 from .utils import consolidate_chat_info, gather_usage_summary
@@ -430,7 +430,23 @@ class ConversableAgent(LLMAgent):
         chat_to_run = ConversableAgent._get_chats_to_run(chat_queue, recipient, messages, sender, config)
         if not chat_to_run:
             return True, None
+
+        if logging_enabled():  # Nested chat log - start
+            import uuid
+
+            unique_nested_id = uuid.uuid4()
+            log_flow(
+                source=recipient,
+                code_point="_summary_from_nested_chat start",
+                code_point_id=str(unique_nested_id),
+                sender=sender.name,
+            )
+
         res = initiate_chats(chat_to_run)
+
+        if logging_enabled():  # Nested chat log - end
+            log_flow(source=recipient, code_point="_summary_from_nested_chat end", code_point_id=str(unique_nested_id))
+
         return True, res[-1].summary
 
     @staticmethod
@@ -856,7 +872,7 @@ class ConversableAgent(LLMAgent):
         # When the agent receives a message, the role of the message is "user". (If 'role' exists and is 'function', it will remain unchanged.)
         valid = self._append_oai_message(message, "user", sender, is_sending=False)
         if logging_enabled():
-            log_event(self, "received_message", message=message, sender=sender.name, valid=valid)
+            log_event(self, "received_message", message=message, sender=sender.name, valid=valid, silent=silent)
 
         if not valid:
             raise ValueError(
@@ -1093,6 +1109,9 @@ class ConversableAgent(LLMAgent):
                 if msg2send is None:
                     break
                 self.send(msg2send, recipient, request_reply=True, silent=silent)
+            else:
+                if logging_enabled():  # Log max turns being hit
+                    log_flow(source=self, code_point="_initiate_chat max_turns", code_point_id=None, turns=max_turns)
         else:
             self._prepare_chat(recipient, clear_history)
             if isinstance(message, Callable):
@@ -1159,6 +1178,9 @@ class ConversableAgent(LLMAgent):
                 if msg2send is None:
                     break
                 await self.a_send(msg2send, recipient, request_reply=True, silent=silent)
+            else:
+                if logging_enabled():  # Log max turns being hit
+                    log_flow(source=self, code_point="_initiate_chat max_turns", code_point_id=None, turns=max_turns)
         else:
             self._prepare_chat(recipient, clear_history)
             if isinstance(message, Callable):
@@ -1243,6 +1265,10 @@ class ConversableAgent(LLMAgent):
                 )
         except (IndexError, AttributeError) as e:
             warnings.warn(f"Cannot extract summary using last_msg: {e}. Using an empty str as summary.", UserWarning)
+
+        if logging_enabled():
+            log_flow(source=sender, code_point="_last_msg_as_summary", code_point_id=None, summary=summary)
+
         return summary
 
     @staticmethod
@@ -1265,6 +1291,17 @@ class ConversableAgent(LLMAgent):
                 f"Cannot extract summary using reflection_with_llm: {e}. Using an empty str as summary.", UserWarning
             )
             summary = ""
+
+        if logging_enabled():
+            log_flow(
+                source=sender,
+                code_point="_reflection_with_llm_as_summary",
+                code_point_id=None,
+                prompt=prompt,
+                msg_list=msg_list,
+                summary=summary,
+            )
+
         return summary
 
     def _reflection_with_llm(
@@ -1727,6 +1764,19 @@ class ConversableAgent(LLMAgent):
                     "role": "tool",
                     "content": content,
                 }
+
+            if logging_enabled():  # Logging, including function name
+                log_flow(
+                    source=self,
+                    code_point="generate_tool_calls_reply",
+                    code_point_id=None,
+                    tool_call_id=str(tool_call_id) if tool_call_id is not None else "",
+                    function_name=function_call["name"],
+                    function_arguments=function_call["arguments"],
+                    return_value=content,
+                    sender=sender.name,
+                )
+
             tool_returns.append(tool_call_response)
         if tool_returns:
             return True, {
@@ -1759,10 +1809,37 @@ class ConversableAgent(LLMAgent):
             messages = self._oai_messages[sender]
         message = messages[-1]
         async_tool_calls = []
+        tool_calls_info = []  # List to store tool call info for logging
         for tool_call in message.get("tool_calls", []):
+            function_call = tool_call.get("function", {})
+            tool_calls_info.append(
+                {
+                    "tool_call_id": tool_call.get("id"),
+                    "function_name": function_call.get("name"),
+                    "function_arguments": function_call.get("arguments", {}),
+                }
+            )
+
             async_tool_calls.append(self._a_execute_tool_call(tool_call))
         if async_tool_calls:
             tool_returns = await asyncio.gather(*async_tool_calls)
+
+            # Log each tool return along with the corresponding function info
+            if logging_enabled():
+                for tool_return, tool_call_info in zip(tool_returns, tool_calls_info):
+                    log_flow(
+                        source=self,
+                        code_point="a_generate_tool_calls_reply",
+                        code_point_id=None,
+                        tool_call_id=(
+                            str(tool_call_info["tool_call_id"]) if tool_call_info["tool_call_id"] is not None else ""
+                        ),
+                        function_name=tool_call_info["function_name"],
+                        function_arguments=tool_call_info["function_arguments"],
+                        return_value=tool_return["content"],
+                        sender=sender.name if sender else "",
+                    )
+
             return True, {
                 "role": "tool",
                 "tool_responses": tool_returns,

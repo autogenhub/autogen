@@ -152,6 +152,31 @@ def test_log_function_use(db_connection):
         assert row["returns"] == json.dumps(returns)
 
 
+def test_log_flow(db_connection):
+    cur = db_connection.cursor()
+
+    source = autogen.AssistantAgent(name="TestAgent", code_execution_config=False)
+    info = {"foo": "bar"}
+
+    autogen.runtime_logging.log_flow(
+        source=source,
+        code_point="_summary_from_nested_chat start",
+        code_point_id="1bb623ba-f2d2-406a-844e-5103a500d038",
+        **info
+    )
+
+    query = """
+        SELECT source_id, source_name, code_point, code_point_id, info, timestamp
+        FROM flows
+    """
+
+    for row in cur.execute(query):
+        assert row["source_name"] == "TestAgent"
+        assert row["code_point"] == "_summary_from_nested_chat start"
+        assert row["code_point_id"] == "1bb623ba-f2d2-406a-844e-5103a500d038"
+        assert row["info"] == json.dumps(info)
+
+
 def test_log_new_agent(db_connection):
     from autogen import AssistantAgent
 

@@ -124,6 +124,19 @@ class SqliteLogger(BaseLogger):
             self._run_query(query=query)
 
             query = """
+                CREATE TABLE IF NOT EXISTS custom_clients (
+                    id INTEGER PRIMARY KEY,                             -- Key assigned by the database
+                    client_id INTEGER,                                  -- result of python id(client)
+                    wrapper_id INTEGER,                                 -- result of python id(wrapper)
+                    session_id TEXT,
+                    model_client_class TEXT,                            -- type or class name of client
+                    init_args TEXT,                                     -- JSON serialization of constructor
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(client_id, session_id))
+            """
+            self._run_query(query=query)
+
+            query = """
             CREATE TABLE IF NOT EXISTS version (
                 id INTEGER PRIMARY KEY CHECK (id = 1),                  -- id of the logging database
                 version_number INTEGER NOT NULL                         -- version of the logging database
@@ -152,6 +165,18 @@ class SqliteLogger(BaseLogger):
                             function_name TEXT,
                             args TEXT DEFAULT NULL,
                             returns TEXT DEFAULT NULL,
+                            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                        );
+                        """
+            self._run_query(query=query)
+
+            query = """
+                        CREATE TABLE IF NOT EXISTS flows (
+                            source_id INTEGER,
+                            source_name TEXT,
+                            code_point TEXT,
+                            code_point_id TEXT,
+                            info TEXT DEFAULT NULL,
                             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
                         );
                         """
@@ -448,6 +473,57 @@ class SqliteLogger(BaseLogger):
             get_current_ts(),
         )
         self._run_query(query=query, args=args)
+
+    def log_new_custom_client(
+        self, client: Any, wrapper: OpenAIWrapper, init_args: Dict[str, Any], model_client_cls_name: str
+    ) -> None:
+        if self.con is None:
+            return
+
+        args = to_dict(
+            init_args,
+            exclude=(
+                "self",
+                "__class__",
+                "api_key",
+            ),
+        )
+
+        query = """
+        INSERT INTO custom_clients (client_id, wrapper_id, session_id, model_client_class, init_args, timestamp) VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT (client_id, session_id) DO NOTHING;
+        """
+        args = (
+            id(client),
+            id(wrapper),
+            self.session_id,
+            model_client_cls_name,
+            json.dumps(args),
+            get_current_ts(),
+        )
+        self._run_query(query=query, args=args)
+
+    def log_flow(
+        self, source: Union[str, Agent], code_point: str, code_point_id: str, **kwargs: Dict[str, Any]
+    ) -> None:
+
+        if self.con is None:
+            return
+
+        json_args = json.dumps(kwargs, default=lambda o: f"<<non-serializable: {type(o).__qualname__}>>")
+
+        query = """
+        INSERT INTO flows (source_id, source_name, code_point, code_point_id, info, timestamp) VALUES (?, ?, ?, ?, ?, ?)
+        """
+        query_args: Tuple[Any, ...] = (
+            id(source),
+            source.name if hasattr(source, "name") else source,
+            code_point,
+            code_point_id,
+            json_args,
+            get_current_ts(),
+        )
+        self._run_query(query=query, args=query_args)
 
     def stop(self) -> None:
         if self.con:

@@ -131,3 +131,11 @@ AutoGen includes support for handling long textual contexts by leveraging the LL
 ```bash
 pip install "autogen[long-context]"
 ```
+
+## Visualize
+
+To generate diagrams from AutoGen workflow logs please install AutoGen with the `[visualize]` option:
+
+```bash
+pip install "autogen[visualize]"
+```

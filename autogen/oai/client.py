@@ -19,7 +19,13 @@ from autogen.cache import Cache
 from autogen.io.base import IOStream
 from autogen.logger.logger_utils import get_current_ts
 from autogen.oai.openai_utils import OAI_PRICE1K, get_key, is_valid_api_key
-from autogen.runtime_logging import log_chat_completion, log_new_client, log_new_wrapper, logging_enabled
+from autogen.runtime_logging import (
+    log_chat_completion,
+    log_new_client,
+    log_new_custom_client,
+    log_new_wrapper,
+    logging_enabled,
+)
 from autogen.token_count_utils import count_token
 
 TOOL_ENABLED = False
@@ -560,11 +566,13 @@ class OpenAIWrapper:
         if model_client_cls_name is not None:
             # a config for a custom client is set
             # adding placeholder until the register_model_client is called with the appropriate class
-            self._clients.append(PlaceHolderClient(config))
+            custom_client = PlaceHolderClient(config)
+            self._clients.append(custom_client)
             logger.info(
                 f"Detected custom model client in config: {model_client_cls_name}, model client can not be used until register_model_client is called."
             )
-            # TODO: logging for custom client
+            if logging_enabled():
+                log_new_custom_client(custom_client, self, config, model_client_cls_name)
         else:
             if api_type is not None and api_type.startswith("azure"):
                 self._configure_azure_openai(config, openai_config)

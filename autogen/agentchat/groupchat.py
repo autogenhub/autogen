@@ -10,6 +10,7 @@ import logging
 import random
 import re
 import sys
+import uuid
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Literal, Optional, Tuple, Union
 
@@ -18,7 +19,7 @@ from ..exception_utils import AgentNameConflict, NoEligibleSpeaker, UndefinedNex
 from ..formatting_utils import colored
 from ..graph_utils import check_graph_validity, invert_disallowed_to_allowed
 from ..io.base import IOStream
-from ..runtime_logging import log_new_agent, logging_enabled
+from ..runtime_logging import log_flow, log_new_agent, logging_enabled
 from .agent import Agent
 from .chat import ChatResult
 from .contrib.capabilities import transform_messages
@@ -272,6 +273,18 @@ class GroupChat:
         if self.select_speaker_auto_verbose is None or not isinstance(self.select_speaker_auto_verbose, bool):
             raise ValueError("select_speaker_auto_verbose cannot be None or non-bool")
 
+        if logging_enabled():
+            log_flow(
+                "[GroupChat]",
+                "__post_init__",
+                "",
+                agent_names=self.agent_names,
+                groupchat_name=self.admin_name,
+                speaker_selection_method=self.speaker_selection_method,
+            )
+
+        self._unique_id = str(uuid.uuid4())  # unique identifier for tracking if multiple group chats
+
     @property
     def agent_names(self) -> List[str]:
         """Return the names of the agents in the group chat."""
@@ -402,6 +415,14 @@ class GroupChat:
                     break
                 i = int(i)
                 if i > 0 and i <= _n_agents:
+                    if logging_enabled():
+                        log_flow(
+                            source="[GroupChat]",
+                            code_point="manual_select_speaker",
+                            code_point_id=None,
+                            groupchat_name=self.admin_name,
+                            next_agent=agents[i - 1].name,
+                        )
                     return agents[i - 1]
                 else:
                     raise ValueError
@@ -413,7 +434,19 @@ class GroupChat:
         """Randomly select the next speaker."""
         if agents is None:
             agents = self.agents
-        return random.choice(agents)
+
+        random_selection = random.choice(agents)
+
+        if logging_enabled():
+            log_flow(
+                source="[GroupChat]",
+                code_point="random_select_speaker",
+                code_point_id=None,
+                groupchat_name=self.admin_name,
+                next_agent=random_selection.name,
+            )
+
+        return random_selection
 
     def _prepare_and_select_agents(
         self,
@@ -424,6 +457,24 @@ class GroupChat:
         speaker_selection_method = self.speaker_selection_method
         if isinstance(self.speaker_selection_method, Callable):
             selected_agent = self.speaker_selection_method(last_speaker, self)
+
+            if logging_enabled() and selected_agent:
+                log_flow(
+                    source="[GroupChat]",
+                    code_point=f"_prepare_and_select_agents:callable:{self.speaker_selection_method.__name__}",
+                    code_point_id=None,
+                    groupchat_unique_id=self._unique_id,
+                    last_speaker=last_speaker.name,
+                    next_agent=(
+                        selected_agent.name
+                        if selected_agent is not None and isinstance(selected_agent, Agent)
+                        else "[NONE]"
+                    ),
+                    returned_speaker_selection_method=(
+                        selected_agent if selected_agent is not None and isinstance(selected_agent, str) else None
+                    ),
+                )
+
             if selected_agent is None:
                 raise NoEligibleSpeaker("Custom speaker selection function returned None. Terminating conversation.")
             elif isinstance(selected_agent, Agent):
@@ -530,6 +581,17 @@ class GroupChat:
             selected_agent = self.manual_select_speaker(graph_eligible_agents)
         elif speaker_selection_method.lower() == "round_robin":
             selected_agent = self.next_agent(last_speaker, graph_eligible_agents)
+
+            if logging_enabled():
+                log_flow(
+                    source="[GroupChat]",
+                    code_point="round_robin",
+                    code_point_id=None,
+                    groupchat_name=self.admin_name,
+                    last_speaker=last_speaker.name,
+                    next_agent=selected_agent.name,
+                )
+
         elif speaker_selection_method.lower() == "random":
             selected_agent = self.random_select_speaker(graph_eligible_agents)
         else:  # auto
@@ -540,6 +602,17 @@ class GroupChat:
                 select_speaker_messages[-1] = dict(select_speaker_messages[-1], function_call=None)
             if select_speaker_messages[-1].get("tool_calls", False):
                 select_speaker_messages[-1] = dict(select_speaker_messages[-1], tool_calls=None)
+
+        if logging_enabled() and selected_agent:
+            log_flow(
+                source="[GroupChat]",
+                code_point=f"speaker_selection_method:{speaker_selection_method}",
+                code_point_id=None,
+                groupchat_unique_id=self._unique_id,
+                last_speaker=last_speaker.name,
+                next_agent=selected_agent.name,
+            )
+
         return selected_agent, graph_eligible_agents, select_speaker_messages
 
     def select_speaker(self, last_speaker: Agent, selector: ConversableAgent) -> Agent:
@@ -551,7 +624,19 @@ class GroupChat:
             return selected_agent
         elif self.speaker_selection_method == "manual":
             # An agent has not been selected while in manual mode, so move to the next agent
-            return self.next_agent(last_speaker)
+            next_agent = self.next_agent(last_speaker)
+
+            if logging_enabled() and selected_agent:
+                log_flow(
+                    source="[GroupChat]",
+                    code_point="speaker_selection_method:manual-not-selected",
+                    code_point_id=None,
+                    groupchat_name=self.admin_name,
+                    last_speaker=last_speaker.name,
+                    next_agent=next_agent.name,
+                )
+
+            return next_agent
 
         # auto speaker selection with 2-agent chat
         return self._auto_select_speaker(last_speaker, selector, messages, agents)
@@ -564,7 +649,19 @@ class GroupChat:
             return selected_agent
         elif self.speaker_selection_method == "manual":
             # An agent has not been selected while in manual mode, so move to the next agent
-            return self.next_agent(last_speaker)
+            next_agent = self.next_agent(last_speaker)
+
+            if logging_enabled() and selected_agent:
+                log_flow(
+                    source="[GroupChat]",
+                    code_point="speaker_selection_method:manual-not-selected",
+                    code_point_id=None,
+                    groupchat_name=self.admin_name,
+                    last_speaker=last_speaker.name,
+                    next_agent=next_agent.name,
+                )
+
+            return next_agent
 
         # auto speaker selection with 2-agent chat
         return await self.a_auto_select_speaker(last_speaker, selector, messages, agents)
@@ -613,6 +710,17 @@ class GroupChat:
         Returns:
             Dict: a counter for mentioned agents.
         """
+
+        if logging_enabled():
+            auto_select_speaker_id = uuid.uuid4()
+            log_flow(
+                source="[GroupChat]",
+                code_point="_auto_select_speaker start",
+                code_point_id=None,
+                groupchat_name=self.admin_name,
+                selector=selector.name,
+                auto_select_speaker_id=str(auto_select_speaker_id),
+            )
 
         # If no agents are passed in, assign all the group chat's agents
         if agents is None:
@@ -689,6 +797,16 @@ class GroupChat:
             silent=not self.select_speaker_auto_verbose,  # Base silence on the verbose attribute
         )
 
+        if logging_enabled():
+            log_flow(
+                source="[GroupChat]",
+                code_point="_auto_select_speaker end",
+                code_point_id=None,
+                groupchat_name=self.admin_name,
+                selector=selector.name,
+                auto_select_speaker_id=str(auto_select_speaker_id),
+            )
+
         return self._process_speaker_selection_result(result, last_speaker, agents)
 
     async def a_auto_select_speaker(
@@ -717,6 +835,17 @@ class GroupChat:
         Returns:
             Dict: a counter for mentioned agents.
         """
+
+        if logging_enabled():
+            auto_select_speaker_id = uuid.uuid4()
+            log_flow(
+                source="[GroupChat]",
+                code_point="a_auto_select_speaker start",
+                code_point_id=None,
+                groupchat_name=self.admin_name,
+                selector=selector.name,
+                auto_select_speaker_id=str(auto_select_speaker_id),
+            )
 
         # If no agents are passed in, assign all the group chat's agents
         if agents is None:
@@ -786,6 +915,16 @@ class GroupChat:
             clear_history=False,
             silent=not self.select_speaker_auto_verbose,  # Base silence on the verbose attribute
         )
+
+        if logging_enabled():
+            log_flow(
+                source="[GroupChat]",
+                code_point="a_auto_select_speaker end",
+                code_point_id=None,
+                groupchat_name=self.admin_name,
+                selector=selector.name,
+                auto_select_speaker_id=str(auto_select_speaker_id),
+            )
 
         return self._process_speaker_selection_result(result, last_speaker, agents)
 
@@ -990,13 +1129,14 @@ class GroupChatManager(ConversableAgent):
             system_message=system_message,
             **kwargs,
         )
-        if logging_enabled():
-            log_new_agent(self, locals())
+
         # Store groupchat
         self._groupchat = groupchat
-
         self._last_speaker = None
         self._silent = silent
+
+        if logging_enabled():
+            log_new_agent(self, locals())
 
         # Order of register_reply is important.
         # Allow sync chat if initiated using initiate_chat
@@ -1099,6 +1239,19 @@ class GroupChatManager(ConversableAgent):
         send_introductions = getattr(groupchat, "send_introductions", False)
         silent = getattr(self, "_silent", False)
 
+        if logging_enabled():
+            unique_nested_id = uuid.uuid4()
+            log_flow(
+                source="[GroupChat]",
+                code_point="run_chat start",
+                code_point_id=str(unique_nested_id),
+                groupchatmanager_source_id=id(self),
+                groupchatmanager_name=self.name,
+                sender=sender.name if sender else "None",
+                send_introductions=send_introductions,
+                silent=silent,
+            )
+
         if send_introductions:
             # Broadcast the intro
             intro = groupchat.introductions_msg()
@@ -1120,6 +1273,18 @@ class GroupChatManager(ConversableAgent):
                     self.send(message, agent, request_reply=False, silent=True)
             if self._is_termination_msg(message) or i == groupchat.max_round - 1:
                 # The conversation is over or it's the last round
+
+                if logging_enabled():
+                    log_flow(
+                        source="[GroupChat]",
+                        code_point="run_chat "
+                        + ("is_termination_msg" if self._is_termination_msg(message) else "max_rounds"),
+                        code_point_id=str(unique_nested_id),
+                        groupchatmanager_source_id=id(self),
+                        groupchatmanager_name=self.name,
+                        sender=sender.name if sender else "None",
+                    )
+
                 break
             try:
                 # select the next speaker
@@ -1162,6 +1327,17 @@ class GroupChatManager(ConversableAgent):
             for a in groupchat.agents:
                 a.client_cache = a.previous_cache
                 a.previous_cache = None
+
+        if logging_enabled():
+            log_flow(
+                source="[GroupChat]",
+                code_point="run_chat end",
+                code_point_id=str(unique_nested_id),
+                groupchatmanager_source_id=id(self),
+                groupchatmanager_name=self.name,
+                sender=sender.name if sender else "None",
+            )
+
         return True, None
 
     async def a_run_chat(
@@ -1178,6 +1354,19 @@ class GroupChatManager(ConversableAgent):
         groupchat = config
         send_introductions = getattr(groupchat, "send_introductions", False)
         silent = getattr(self, "_silent", False)
+
+        if logging_enabled():
+            unique_nested_id = uuid.uuid4()
+            log_flow(
+                source="[GroupChat]",
+                code_point="a_run_chat start",
+                code_point_id=str(unique_nested_id),
+                groupchatmanager_source_id=id(self),
+                groupchatmanager_name=self.name,
+                sender=sender.name if sender else "None",
+                send_introductions=send_introductions,
+                silent=silent,
+            )
 
         if send_introductions:
             # Broadcast the intro
@@ -1228,6 +1417,17 @@ class GroupChatManager(ConversableAgent):
             for a in groupchat.agents:
                 a.client_cache = a.previous_cache
                 a.previous_cache = None
+
+        if logging_enabled():
+            log_flow(
+                source="[GroupChat]",
+                code_point="run_chat end",
+                code_point_id=str(unique_nested_id),
+                groupchatmanager_source_id=id(self),
+                groupchatmanager_name=self.name,
+                sender=sender.name if sender else "None",
+            )
+
         return True, None
 
     def resume(

@@ -1,7 +1,6 @@
-# Contributors
+# Maintainers
 
-## Special thanks to all the people who help this project:
-> These individuals dedicate their time and expertise to improve this project. We are deeply grateful for their contributions.
+## Here is a list of maintainers for the AutoGen project.
 
 | Name            | GitHub Handle                                              | Organization           | Features                                | Roadmap Lead |
 |-----------------|------------------------------------------------------------|------------------------|-----------------------------------------|--------------|
@@ -12,12 +11,12 @@
 | Hrushikesh Dokala | [Hk669](https://github.com/Hk669)                        | -                      | alt-models, swebench, logging, rag      | No           |
 | Jiale Liu       | [LeoLjl](https://github.com/LeoLjl)                       | Penn State University  | autobuild, group chat                   | No           |
 | Shaokun Zhang   | [skzhang1](https://github.com/skzhang1)                    | Penn State University  | AgentOptimizer, Teachability            | Yes          |
-| Rajan Chari     | [rajan-chari](https://github.com/rajan-chari)              | Microsoft Research     | CAP, Survey of other frameworks         | No           |
 | Yixuan Zhai     | [randombet](https://github.com/randombet)                  | Meta                   | group chat, sequential_chats, rag       | No           |
-| Xiaoyun Zhang   | [LittleLittleCloud](https://github.com/LittleLittleCloud)  | Microsoft              | AutoGen.Net, group chat                 | Yes          |
 | Yiran Wu        | [yiranwu0](https://github.com/yiranwu0)                    | Penn State University  | alt-models, group chat, logging         | Yes          |
 | Beibin Li       | [BeibinLi](https://github.com/BeibinLi)                    | Microsoft Research     | alt-models                              | Yes          |
 | Davor Runje     | [davorrunje](https://github.com/davorrunje)                | airt.ai                | Tool calling, IO                        |              |
+| Olaoluwa Ademola Salami | [olaoluwasalami](https://github.com/olaoluwasalami)  | DevOps Engineer          |                                     |              |
+
 
 
 ## I would like to join this list. How can I help the project?

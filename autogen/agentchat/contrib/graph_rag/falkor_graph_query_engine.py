@@ -1,5 +1,5 @@
 import os
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import List
 
 from graphrag_sdk import KnowledgeGraph, Source
@@ -9,6 +9,7 @@ from .document import Document
 from .graph_query_engine import GraphStoreQueryResult
 
 
+@dataclass
 class FalkorGraphQueryResult(GraphStoreQueryResult):
     messages: list = field(default_factory=list)
 

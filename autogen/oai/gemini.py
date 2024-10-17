@@ -38,6 +38,8 @@ Resources:
 from __future__ import annotations
 
 import base64
+import copy
+import json
 import logging
 import os
 import random
@@ -50,18 +52,27 @@ from typing import Any, Dict, List, Mapping, Union
 import google.generativeai as genai
 import requests
 import vertexai
-from google.ai.generativelanguage import Content, Part
+from google.ai.generativelanguage import Content, FunctionCall, FunctionDeclaration, Part, Tool
+from google.ai.generativelanguage_v1beta.types import Schema
 from google.auth.credentials import Credentials
-from openai.types.chat import ChatCompletion
+from openai.types.chat import ChatCompletion, ChatCompletionMessageToolCall
 from openai.types.chat.chat_completion import ChatCompletionMessage, Choice
 from openai.types.completion_usage import CompletionUsage
 from PIL import Image
-from vertexai.generative_models import Content as VertexAIContent
+from vertexai.generative_models import (
+    Content as VertexAIContent,
+)
+from vertexai.generative_models import (
+    FunctionDeclaration as vaiFunctionDeclaration,
+)
 from vertexai.generative_models import GenerativeModel
 from vertexai.generative_models import HarmBlockThreshold as VertexAIHarmBlockThreshold
 from vertexai.generative_models import HarmCategory as VertexAIHarmCategory
 from vertexai.generative_models import Part as VertexAIPart
 from vertexai.generative_models import SafetySetting as VertexAISafetySetting
+from vertexai.generative_models import (
+    Tool as vaiTool,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -180,6 +191,10 @@ class GeminiClient:
         n_response = params.get("n", 1)
         system_instruction = params.get("system_instruction", None)
         response_validation = params.get("response_validation", True)
+        if "tools" in params:
+            tools = self._tools_to_gemini_tools(params["tools"])
+        else:
+            tools = []
 
         generation_config = {
             gemini_term: params[autogen_term]
@@ -212,20 +227,44 @@ class GeminiClient:
                 )
                 chat = model.start_chat(history=gemini_messages[:-1], response_validation=response_validation)
             else:
-                # we use chat model by default
                 model = genai.GenerativeModel(
                     model_name,
                     generation_config=generation_config,
                     safety_settings=safety_settings,
                     system_instruction=system_instruction,
+                    tools=tools,
                 )
                 genai.configure(api_key=self.api_key)
                 chat = model.start_chat(history=gemini_messages[:-1])
 
             response = chat.send_message(gemini_messages[-1].parts, stream=stream, safety_settings=safety_settings)
-            ans: str = chat.history[-1].parts[0].text
+            history = chat.history[-1].parts[0]
+            ans = ""
+            if hasattr(history, "function_call"):
+                random_id = random.randint(0, 10000)
+                autogen_tool_calls = []
+                # we have a function call
+                tool_call: FunctionCall = history.function_call
+                autogen_tool_calls.append(
+                    ChatCompletionMessageToolCall(
+                        id=random_id,
+                        function={
+                            "name": tool_call.name,
+                            "arguments": (
+                                json.dumps({key: val for key, val in tool_call.args.items()})
+                                if tool_call.args is not None
+                                else ""
+                            ),
+                        },  # {key: val for key, val in tool_call.args.items()} },
+                        type="function",
+                    )
+                )
+                random_id += 1
+            else:
+                ans: str = history.text
             prompt_tokens = model.count_tokens(chat.history[:-1]).total_tokens
-            completion_tokens = model.count_tokens(ans).total_tokens
+            # MS FIX THIS:
+            completion_tokens = 0  # MS FIX THIS FIX THIS model.count_tokens(ans).total_tokens
         elif model_name == "gemini-pro-vision":
             # B. handle the vision model
             if self.use_vertexai:
@@ -265,7 +304,9 @@ class GeminiClient:
             completion_tokens = model.count_tokens(ans).total_tokens
 
         # 3. convert output
-        message = ChatCompletionMessage(role="assistant", content=ans, function_call=None, tool_calls=None)
+        message = ChatCompletionMessage(
+            role="assistant", content=ans, function_call=None, tool_calls=autogen_tool_calls
+        )
         choices = [Choice(finish_reason="stop", index=0, message=message)]
 
         response_oai = ChatCompletion(
@@ -391,6 +432,97 @@ class GeminiClient:
                 rst.append(Content(parts=self._oai_content_to_gemini_content("continue"), role="user"))
 
         return rst
+
+    def _tools_to_gemini_tools(self, tools: List[Dict[str, Any]]) -> List[Tool]:
+        """Create Gemini tools (as typically requires Callables)"""
+
+        functions = []
+        for tool in tools:
+            if self.use_vertexai:
+                function = vaiFunctionDeclaration(
+                    name=tool["function"]["name"],
+                    description=tool["function"]["description"],
+                    parameters=tool["function"]["parameters"],
+                )
+            else:
+                function = GeminiClient._create_gemini_function_declaration(tool)
+            functions.append(function)
+
+        if self.use_vertexai:
+            return [vaiTool(function_declarations=functions)]
+        else:
+            return [Tool(function_declarations=functions)]
+
+    @staticmethod
+    def _create_gemini_function_declaration(tool: Dict) -> FunctionDeclaration:
+        function_declaration = FunctionDeclaration()
+        function_declaration.name = tool["function"]["name"]
+        function_declaration.description = tool["function"]["description"]
+
+        parameters_schema = Schema()
+        parameters_schema.type_ = 6  # Type.OBJECT
+        parameters_schema.properties = {}
+        for param_name, param_data in tool["function"]["parameters"]["properties"].items():
+            parameters_schema.properties[param_name] = GeminiClient._create_gemini_function_declaration_schema(
+                param_data
+            )
+
+        parameters_schema.required.extend(tool["function"]["parameters"]["required"])
+
+        function_declaration.parameters = parameters_schema
+
+        return function_declaration
+
+    @staticmethod
+    def _create_gemini_function_declaration_schema(json_data) -> Schema:
+        """Recursively creates Schema objects for FunctionDeclaration."""
+        param_schema = Schema()
+        param_type = json_data["type"]
+
+        """
+        TYPE_UNSPECIFIED = 0
+        STRING = 1
+        INTEGER = 2
+        NUMBER = 3
+        OBJECT = 4
+        ARRAY = 5
+        BOOLEAN = 6
+        """
+
+        if param_type == "integer":
+            param_schema.type_ = 2
+        elif param_type == "number":
+            param_schema.type_ = 3
+        elif param_type == "string":
+            param_schema.type_ = 1
+        elif param_type == "boolean":
+            param_schema.type_ = 6
+        elif param_type == "array":
+            param_schema.type_ = 5
+            if "items" in json_data:
+                param_schema.items = GeminiClient._create_gemini_function_declaration_schema(json_data["items"])
+            else:
+                print("Warning: Array schema missing 'items' definition.")
+        elif param_type == "object":
+            param_schema.type_ = 4
+            param_schema.properties = {}
+            if "properties" in json_data:
+                for prop_name, prop_data in json_data["properties"].items():
+                    param_schema.properties[prop_name] = GeminiClient._create_gemini_function_declaration_schema(
+                        prop_data
+                    )
+                else:
+                    print("Warning: Object schema missing 'properties' definition.")
+
+        elif param_type in ("null", "any"):
+            param_schema.type_ = 1  # Treating these as strings for simplicity
+        else:
+            print(f"Warning: Unsupported parameter type '{param_type}'.")
+
+        if "description" in json_data:
+            param_schema.description = json_data["description"]
+
+        return param_schema
 
     @staticmethod
     def _to_vertexai_safety_settings(safety_settings):

@@ -208,13 +208,13 @@ This script searches for the latest paper on GPT-4 on arXiv, extracts the title,
 Executor (to chat_manager):
 
 exitcode: 0 (execution succeeded)
-Code output: 
+Code output:
 Title: Smurfs: Leveraging Multiple Proficiency Agents with Context-Efficiency for Tool Planning
 Authors: Authors:
-Junzhi Chen, 
-      
-      Juhao Liang, 
-      
+Junzhi Chen,
+
+      Juhao Liang,
+
       Benyou Wang
 Abstract: Abstract:                …scenarios. Notably, Smurfs outmatches the ChatGPT-ReACT in the ToolBench I2 and I3 benchmark with a remarkable 84.4% win rate, surpassing the highest recorded performance of a GPT-4 model at 73.5%. Furthermore, through comprehensive ablation studies, we dissect the contribution of the core components of the multi-agent…         ▽ More           The emergence of large language models (LLMs) has opened up unprecedented possibilities for automating complex tasks that are often comparable to human performance. Despite their capabilities, LLMs still encounter difficulties in completing tasks that require high levels of accuracy and complexity due to their inherent limitations in handling multifaceted problems single-handedly. This paper introduces "Smurfs", a cutting-edge multi-agent framework designed to revolutionize the application of LLMs. By transforming a conventional LLM into a synergistic multi-agent ensemble, Smurfs enhances task decomposition and execution without necessitating extra training. This is achieved through innovative prompting strategies that allocate distinct roles within the model, thereby facilitating collaboration among specialized agents. The framework gives access to external tools to efficiently solve complex tasks. Our empirical investigation, featuring the mistral-7b-instruct model as a case study, showcases Smurfs' superior capability in intricate tool utilization scenarios. Notably, Smurfs outmatches the ChatGPT-ReACT in the ToolBench I2 and I3 benchmark with a remarkable 84.4% win rate, surpassing the highest recorded performance of a GPT-4 model at 73.5%. Furthermore, through comprehensive ablation studies, we dissect the contribution of the core components of the multi-agent framework to its overall efficacy. This not only verifies the effectiveness of the framework, but also sets a route for future exploration of multi-agent LLM systems.         △ Less
 Link: https://arxiv.org/abs/2405.05955
@@ -316,16 +316,16 @@ for i, message in enumerate(groupchat.messages):
 ``` text
 #1, Admin: Find the latest paper about gpt-4 on arxiv and find its potential applications i ...
 #2, Planner: Plan: 1. **Engineer**: Search for the latest paper on GPT-4 on arXiv. 2. **Scien ...
-#3, Admin: Agree 
+#3, Admin: Agree
 #4, Planner: Great! Let's proceed with the plan outlined earlier. I will start by searching f ...
 #5, Engineer: ```python import requests from bs4 import BeautifulSoup  # Define the URL for th ...
 #6, Executor: exitcode: 0 (execution succeeded) Code output:  Title: Smurfs: Leveraging Multip ...
 #7, Scientist: Based on the abstract of the paper titled "Smurfs: Leveraging Multiple Proficien ...
 #8, Engineer: Given the scientist's summary on the potential applications of GPT-4 as enhanced ...
-#9, Admin: Approve 
+#9, Admin: Approve
 #10, Scientist: With the approval from the admin, the plan to explore and integrate GPT-4 into v ...
 #11, Engineer: Given the approval and the insights provided, the next steps involve detailed pl ...
-#12, Admin: Approve 
+#12, Admin: Approve
 #13, Engineer: With the final approval from the admin, the project to integrate GPT-4 into sele ...
 ```
 
@@ -458,14 +458,14 @@ result = last_agent.initiate_chat(recipient=manager, message=last_message, clear
 ``` text
 Digital_Marketer (to chat_manager):
 
-Thank you, Chief_Marketing_Officer!  For 'EcoLux', I propose the following three marketing strategies:  1. 'Green Revolution' Campaign: Highlighting the eco-friendly features of EcoLux through a series of social media ads and influencer partnerships. We can partner with eco-conscious influencers to showcase how EcoLux is not only a luxury car but also an environmentally responsible choice. 2. 'Fuel for Thought' Content Series: Creating a content series that explores the intersection of technology, sustainability, and luxury. This could include blog posts, videos, and podcasts that delve into the innovative features of EcoLux and its impact on the environment. 3. 'EcoLux Experience' Event Marketing: Hosting exclusive events and test drives for potential customers to experience the performance and eco-friendliness of EcoLux firsthand. These events can be held at upscale locations and feature interactive exhibits, product demonstrations, and networking opportunities.  These strategies will help position EcoLux as a leader in the luxury electric-vehicle market while appealing to environmentally conscious consumers who value innovation and sustainability. 
+Thank you, Chief_Marketing_Officer!  For 'EcoLux', I propose the following three marketing strategies:  1. 'Green Revolution' Campaign: Highlighting the eco-friendly features of EcoLux through a series of social media ads and influencer partnerships. We can partner with eco-conscious influencers to showcase how EcoLux is not only a luxury car but also an environmentally responsible choice. 2. 'Fuel for Thought' Content Series: Creating a content series that explores the intersection of technology, sustainability, and luxury. This could include blog posts, videos, and podcasts that delve into the innovative features of EcoLux and its impact on the environment. 3. 'EcoLux Experience' Event Marketing: Hosting exclusive events and test drives for potential customers to experience the performance and eco-friendliness of EcoLux firsthand. These events can be held at upscale locations and feature interactive exhibits, product demonstrations, and networking opportunities.  These strategies will help position EcoLux as a leader in the luxury electric-vehicle market while appealing to environmentally conscious consumers who value innovation and sustainability.
 
 --------------------------------------------------------------------------------
 Chief_Marketing_Officer (to chat_manager):
 
-Thank you, Digital_Marketer, for those comprehensive and innovative marketing strategies. Each strategy you've outlined aligns perfectly with our vision for EcoLux, emphasizing its eco-friendly features, technological innovation, and luxury appeal. The 'Green Revolution' Campaign will leverage the power of social media and influencers to reach our target audience effectively. The 'Fuel for Thought' Content Series will educate and engage potential customers on the importance of sustainability in the luxury automotive sector. Lastly, the 'EcoLux Experience' Event Marketing will provide an immersive experience that showcases the unique value proposition of EcoLux. 
+Thank you, Digital_Marketer, for those comprehensive and innovative marketing strategies. Each strategy you've outlined aligns perfectly with our vision for EcoLux, emphasizing its eco-friendly features, technological innovation, and luxury appeal. The 'Green Revolution' Campaign will leverage the power of social media and influencers to reach our target audience effectively. The 'Fuel for Thought' Content Series will educate and engage potential customers on the importance of sustainability in the luxury automotive sector. Lastly, the 'EcoLux Experience' Event Marketing will provide an immersive experience that showcases the unique value proposition of EcoLux.
 
-I believe these strategies will collectively create a strong market presence for EcoLux, appealing to both luxury car enthusiasts and environmentally conscious consumers. Let's proceed with these strategies and ensure that every touchpoint communicates EcoLux's commitment to luxury, innovation, and sustainability. 
+I believe these strategies will collectively create a strong market presence for EcoLux, appealing to both luxury car enthusiasts and environmentally conscious consumers. Let's proceed with these strategies and ensure that every touchpoint communicates EcoLux's commitment to luxury, innovation, and sustainability.
 
 TERMINATE
 
@@ -540,7 +540,7 @@ Team, let's now think of a name for the next vehicle that embodies that idea. Ch
 --------------------------------------------------------------------------------
 Chief_Marketing_Officer (to chat_manager):
 
-Given the focus on sustainability and luxury, I suggest the name "VerdeVogue" for our next vehicle. "Verde" reflects the green, eco-friendly aspect of the car, while "Vogue" emphasizes its stylish and trendsetting nature in the luxury market. This name encapsulates the essence of combining environmental responsibility with high-end design and performance. 
+Given the focus on sustainability and luxury, I suggest the name "VerdeVogue" for our next vehicle. "Verde" reflects the green, eco-friendly aspect of the car, while "Vogue" emphasizes its stylish and trendsetting nature in the luxury market. This name encapsulates the essence of combining environmental responsibility with high-end design and performance.
 
 Now, I'd like to hear the Product_Manager's suggestion.
 
@@ -552,7 +552,7 @@ For our next vehicle, I propose the name "EcoPrestige." This name highlights the
 --------------------------------------------------------------------------------
 Chief_Marketing_Officer (to chat_manager):
 
-Thank you, Product_Manager, for your suggestion. Both "VerdeVogue" and "EcoPrestige" capture the essence of our new vehicle's eco-friendly luxury. As we move forward, we'll consider these names carefully to ensure our branding aligns perfectly with our product's unique value proposition and market positioning. 
+Thank you, Product_Manager, for your suggestion. Both "VerdeVogue" and "EcoPrestige" capture the essence of our new vehicle's eco-friendly luxury. As we move forward, we'll consider these names carefully to ensure our branding aligns perfectly with our product's unique value proposition and market positioning.
 
 This concludes our meeting. Thank you, everyone, for your valuable contributions. TERMINATE.
 

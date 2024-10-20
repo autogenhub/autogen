@@ -1,4 +1,4 @@
-# Copyright (c) 2023 - 2024, Owners of https://github.com/autogen-ai
+# Copyright (c) 2023 - 2024, Owners of https://github.com/autogenhub
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -12,12 +12,12 @@ import sys
 import uuid
 from typing import Any, Callable, Dict, List, Optional, Protocol, Tuple, Union
 
-from flaml.automl.logger import logger_formatter
 from pydantic import BaseModel
 
 from autogen.cache import Cache
 from autogen.io.base import IOStream
 from autogen.logger.logger_utils import get_current_ts
+from autogen.oai.client_utils import logging_formatter
 from autogen.oai.openai_utils import OAI_PRICE1K, get_key, is_valid_api_key
 from autogen.runtime_logging import log_chat_completion, log_new_client, log_new_wrapper, logging_enabled
 from autogen.token_count_utils import count_token
@@ -59,6 +59,7 @@ try:
 
     cerebras_import_exception: Optional[ImportError] = None
 except ImportError as e:
+    cerebras_AuthenticationError = cerebras_InternalServerError = cerebras_RateLimitError = Exception
     cerebras_import_exception = e
 
 try:
@@ -168,7 +169,7 @@ logger = logging.getLogger(__name__)
 if not logger.handlers:
     # Add the console handler.
     _ch = logging.StreamHandler(stream=sys.stdout)
-    _ch.setFormatter(logger_formatter)
+    _ch.setFormatter(logging_formatter)
     logger.addHandler(_ch)
 
 LEGACY_DEFAULT_CACHE_SEED = 41
@@ -577,7 +578,7 @@ class OpenAIWrapper:
                 self._clients.append(client)
             elif api_type is not None and api_type.startswith("google"):
                 if gemini_import_exception:
-                    raise ImportError("Please install `google-generativeai` to use Google OpenAI API.")
+                    raise ImportError("Please install `google-generativeai` and 'vertexai' to use Google's API.")
                 client = GeminiClient(**openai_config)
                 self._clients.append(client)
             elif api_type is not None and api_type.startswith("anthropic"):

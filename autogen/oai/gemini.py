@@ -174,6 +174,7 @@ class GeminiClient:
         }
 
     def create(self, params: Dict) -> ChatCompletion:
+
         if self.use_vertexai:
             self._initialize_vertexai(**params)
         else:
@@ -181,7 +182,12 @@ class GeminiClient:
                 "location" not in params
             ), "Google Cloud project and compute location cannot be set when using an API Key!"
         model_name = params.get("model", "gemini-pro")
-        if not model_name:
+
+        if model_name == "gemini-pro-vision":
+            raise ValueError(
+                "Gemini 1.0 Pro vision ('gemini-pro-vision') has been deprecated, please consider switching to a different model, for example 'gemini-1.5-flash'."
+            )
+        elif not model_name:
             raise ValueError(
                 "Please provide a model name for the Gemini Client. "
                 "You can configure it in the OAI Config List file. "
@@ -197,7 +203,7 @@ class GeminiClient:
         if "tools" in params:
             tools = self._tools_to_gemini_tools(params["tools"])
         else:
-            tools = []
+            tools = None
 
         generation_config = {
             gemini_term: params[autogen_term]
@@ -224,117 +230,81 @@ class GeminiClient:
         # Maps the function call ids to function names so we can inject it into FunctionResponse messages
         self.tool_call_function_map: Dict[str, str] = {}
 
-        if "vision" not in model_name:
-            # A. create and call the chat model.
-            gemini_messages = self._oai_messages_to_gemini_messages(messages)
-            if self.use_vertexai:
-                model = GenerativeModel(
-                    model_name,
-                    generation_config=generation_config,
-                    safety_settings=safety_settings,
-                    system_instruction=system_instruction,
-                    tools=tools,
-                )
+        # A. create and call the chat model.
+        gemini_messages = self._oai_messages_to_gemini_messages(messages)
+        if self.use_vertexai:
+            model = GenerativeModel(
+                model_name,
+                generation_config=generation_config,
+                safety_settings=safety_settings,
+                system_instruction=system_instruction,
+                tools=tools,
+            )
 
-                chat = model.start_chat(history=gemini_messages[:-1], response_validation=response_validation)
-            else:
-                model = genai.GenerativeModel(
-                    model_name,
-                    generation_config=generation_config,
-                    safety_settings=safety_settings,
-                    system_instruction=system_instruction,
-                    tools=tools,
-                )
+            chat = model.start_chat(history=gemini_messages[:-1], response_validation=response_validation)
+        else:
+            model = genai.GenerativeModel(
+                model_name,
+                generation_config=generation_config,
+                safety_settings=safety_settings,
+                system_instruction=system_instruction,
+                tools=tools,
+            )
 
-                genai.configure(api_key=self.api_key)
-                chat = model.start_chat(history=gemini_messages[:-1])
+            genai.configure(api_key=self.api_key)
+            chat = model.start_chat(history=gemini_messages[:-1])
 
-            response = chat.send_message(gemini_messages[-1].parts, stream=stream, safety_settings=safety_settings)
+        response = chat.send_message(gemini_messages[-1].parts, stream=stream, safety_settings=safety_settings)
 
-            # Extract text and tools from response
-            ans = ""
-            random_id = random.randint(0, 10000)
-            prev_function_calls = []
-            for part in response.parts:
+        # Extract text and tools from response
+        ans = ""
+        random_id = random.randint(0, 10000)
+        prev_function_calls = []
+        for part in response.parts:
 
-                # Function calls
-                if fn_call := part.function_call:
+            # Function calls
+            if fn_call := part.function_call:
 
-                    # If we have a repeated function call, ignore it
-                    if fn_call not in prev_function_calls:
-                        autogen_tool_calls.append(
-                            ChatCompletionMessageToolCall(
-                                id=random_id,
-                                function={
-                                    "name": fn_call.name,
-                                    "arguments": (
-                                        json.dumps({key: val for key, val in fn_call.args.items()})
-                                        if fn_call.args is not None
-                                        else ""
-                                    ),
-                                },
-                                type="function",
-                            )
+                # If we have a repeated function call, ignore it
+                if fn_call not in prev_function_calls:
+                    autogen_tool_calls.append(
+                        ChatCompletionMessageToolCall(
+                            id=random_id,
+                            function={
+                                "name": fn_call.name,
+                                "arguments": (
+                                    json.dumps({key: val for key, val in fn_call.args.items()})
+                                    if fn_call.args is not None
+                                    else ""
+                                ),
+                            },
+                            type="function",
                         )
+                    )
 
-                        prev_function_calls.append(fn_call)
-                        random_id += 1
+                    prev_function_calls.append(fn_call)
+                    random_id += 1
 
-                # Plain text content
-                elif text := part.text:
-                    ans += text
+            # Plain text content
+            elif text := part.text:
+                ans += text
 
-            # If we have function calls, ignore the text
-            # as it can be Gemini guessing the function response
-            if len(autogen_tool_calls) != 0:
-                ans = ""
+        # If we have function calls, ignore the text
+        # as it can be Gemini guessing the function response
+        if len(autogen_tool_calls) != 0:
+            ans = ""
+        else:
+            autogen_tool_calls = None
 
-            prompt_tokens = response.usage_metadata.prompt_token_count
-            completion_tokens = response.usage_metadata.candidates_token_count
-
-        elif model_name == "gemini-pro-vision":
-            # B. handle the vision model
-            if self.use_vertexai:
-                model = GenerativeModel(
-                    model_name,
-                    generation_config=generation_config,
-                    safety_settings=safety_settings,
-                    system_instruction=system_instruction,
-                )
-            else:
-                model = genai.GenerativeModel(
-                    model_name,
-                    generation_config=generation_config,
-                    safety_settings=safety_settings,
-                    system_instruction=system_instruction,
-                )
-                genai.configure(api_key=self.api_key)
-            # Gemini's vision model does not support chat history yet
-            # chat = model.start_chat(history=gemini_messages[:-1])
-            # response = chat.send_message(gemini_messages[-1].parts)
-            user_message = self._oai_content_to_gemini_content(messages[-1]["content"])
-            if len(messages) > 2:
-                warnings.warn(
-                    "Warning: Gemini's vision model does not support chat history yet.",
-                    "We only use the last message as the prompt.",
-                    UserWarning,
-                )
-
-            response = model.generate_content(user_message, stream=stream)
-            if self.use_vertexai:
-                ans: str = response.candidates[0].content.parts[0].text
-            else:
-                ans: str = response._result.candidates[0].content.parts[0].text
-
-            prompt_tokens = response.usage_metadata.prompt_token_count
-            completion_tokens = response.usage_metadata.candidates_token_count
+        prompt_tokens = response.usage_metadata.prompt_token_count
+        completion_tokens = response.usage_metadata.candidates_token_count
 
         # 3. convert output
         message = ChatCompletionMessage(
             role="assistant", content=ans, function_call=None, tool_calls=autogen_tool_calls
         )
         choices = [
-            Choice(finish_reason="tool_calls" if len(autogen_tool_calls) > 0 else "stop", index=0, message=message)
+            Choice(finish_reason="tool_calls" if autogen_tool_calls is not None else "stop", index=0, message=message)
         ]
 
         response_oai = ChatCompletion(

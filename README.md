@@ -26,7 +26,7 @@ We extend our sincere gratitude to the original owner of `autogen` pypi package 
 📄 **License Change:**
 With this new release and package name, we are officially switching to the Apache 2.0 license. This enhances our commitment to open-source collaboration while providing additional protections for contributors and users alike.
 
-:fire :fire: Aug, 2024: A new organization [autogenhub](https://github.com/autogenhub) is created to host the development of AutoGen and related projects with open governance. We invite collaborators from all organizations and individuals.
+:fire: Aug, 2024: A new organization [autogenhub](https://github.com/autogenhub) is created to host the development of AutoGen and related projects with open governance. We invite collaborators from all organizations and individuals.
 
 :tada: May 29, 2024: DeepLearning.ai launched a new short course [AI Agentic Design Patterns with AutoGen](https://www.deeplearning.ai/short-courses/ai-agentic-design-patterns-with-autogen), made in collaboration with Microsoft and Penn State University, and taught by AutoGen creators [Chi Wang](https://github.com/sonichi) and [Qingyun Wu](https://github.com/qingyun-wu).
 

@@ -4,7 +4,7 @@
         <title>AutoGen Blog</title>
         <link>https://autogenhub.github.io/autogen/talks</link>
         <description>AutoGen Blog</description>
-        <lastBuildDate>Tue, 22 Oct 2024 04:13:01 GMT</lastBuildDate>
+        <lastBuildDate>Tue, 22 Oct 2024 16:20:29 GMT</lastBuildDate>
         <docs>https://validator.w3.org/feed/docs/rss2.html</docs>
         <generator>https://github.com/jpmonette/feed</generator>
         <language>en</language>
@@ -12,7 +12,7 @@
             <title><![CDATA[Future Talks]]></title>
             <link>https://autogenhub.github.io/autogen/talks/future-talks</link>
             <guid>https://autogenhub.github.io/autogen/talks/future-talks</guid>
-            <pubDate>Tue, 22 Oct 2024 04:13:01 GMT</pubDate>
+            <pubDate>Tue, 22 Oct 2024 16:20:29 GMT</pubDate>
             <description><![CDATA[Coming soon!!! Join our community to be the first to know about upcoming talks.]]></description>
             <content:encoded><![CDATA[<p>Coming soon!!! Join our community to be the first to know about upcoming talks.</p>]]></content:encoded>
         </item>

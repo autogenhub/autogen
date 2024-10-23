@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://autogenhub.github.io/autogen/talks</id>
     <title>AutoGen Blog</title>
-    <updated>2024-10-23T21:25:14.000Z</updated>
+    <updated>2024-10-23T22:48:19.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://autogenhub.github.io/autogen/talks"/>
     <subtitle>AutoGen Blog</subtitle>
@@ -11,7 +11,7 @@
         <title type="html"><![CDATA[Future Talks]]></title>
         <id>https://autogenhub.github.io/autogen/talks/future-talks</id>
         <link href="https://autogenhub.github.io/autogen/talks/future-talks"/>
-        <updated>2024-10-23T21:25:14.000Z</updated>
+        <updated>2024-10-23T22:48:19.000Z</updated>
         <summary type="html"><![CDATA[Coming soon! Join our community to be the first to know about upcoming talks.]]></summary>
         <content type="html"><![CDATA[<p>Coming soon! Join our community to be the first to know about upcoming talks.</p>
 <p>Connect: <a href="mailto:shaokunzhang529@gmail.com" target="_blank" rel="noopener noreferrer">shaokunzhang529@gmail.com</a></p>]]></content>

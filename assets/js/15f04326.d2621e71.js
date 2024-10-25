@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwebsite=self.webpackChunkwebsite||[]).push([[2467],{25179:e=>{e.exports=JSON.parse('{"label":"Nexla","permalink":"/autogen/blog/tags/nexla","allTagsPath":"/autogen/blog/tags","count":1,"unlisted":false}')}}]);

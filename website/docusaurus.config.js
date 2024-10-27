@@ -15,12 +15,12 @@ customPostCssPlugin = () => {
 module.exports = {
   title: "AutoGen",
   tagline: "An Open-Source Programming Framework for Agentic AI",
-  url: "https://autogen-ai.github.io",
+  url: "https://autogenhub.github.io",
   baseUrl: "/autogen/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/ag.ico",
-  organizationName: "autogen-ai", // Usually your GitHub org/user name.
+  organizationName: "autogenhub", // Usually your GitHub org/user name.
   projectName: "AutoGen", // Usually your repo name.
   scripts: [
     {
@@ -33,6 +33,11 @@ module.exports = {
     format: "detect", // Support for MD files with .md extension
   },
   themeConfig: {
+    themeConfig: {
+      colorMode: {
+        defaultMode: 'dark',
+      },
+    },
     docs: {
       sidebar: {
         autoCollapseCategories: true,
@@ -131,7 +136,7 @@ module.exports = {
           items: [
             {
               label: "Dotnet",
-              href: "https://autogen-ai.github.io/autogen-for-net/",
+              href: "https://autogenhub.github.io/autogen-for-net/",
             },
           ],
         },
@@ -141,7 +146,12 @@ module.exports = {
           position: "left",
         },
         {
-          href: "https://github.com/autogen-ai/autogen",
+          to: "talks",
+          label: "Community Talks",
+          position: "left",
+        },
+        {
+          href: "https://github.com/autogenhub/autogen",
           label: "GitHub",
           position: "right",
         },
@@ -160,30 +170,21 @@ module.exports = {
     footer: {
       style: "dark",
       links: [
-        // {
-        //   title: 'Docs',
-        //   items: [
-        //     {
-        //       label: 'Getting Started',
-        //       to: 'docs/getting-started',
-        //     },
-        //   ],
-        // },
         {
-          title: "Community",
+          // title: "Community",
           items: [
             //     // {
             //     //   label: 'Stack Overflow',
             //     //   href: 'https://stackoverflow.com/questions/tagged/pymarlin',
             //     // },
-            {
-              label: "Discord",
-              href: "https://discord.gg/pAbnFJrkgZ",
-            },
-            {
-              label: "Twitter",
-              href: "https://twitter.com/Chi_Wang_",
-            },
+            // {
+            //   label: "Discord",
+            //   href: "https://discord.gg/pAbnFJrkgZ",
+            // },
+            // {
+            //   label: "Twitter",
+            //   href: "https://twitter.com/Chi_Wang_",
+            // },
           ],
         },
       ],
@@ -214,7 +215,7 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve("./sidebars.js"),
           // Please change this to your repo.
-          editUrl: "https://github.com/autogen-ai/autogen/edit/main/website/",
+          editUrl: "https://github.com/autogenhub/autogen/edit/main/website/",
           remarkPlugins: [math],
           rehypePlugins: [katex],
         },
@@ -234,6 +235,15 @@ module.exports = {
   ],
 
   plugins: [
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'talks',
+        routeBasePath: 'talks',
+        path: './talks',
+        showReadingTime: true,
+      },
+    ],
     [
       require.resolve("@easyops-cn/docusaurus-search-local"),
       {

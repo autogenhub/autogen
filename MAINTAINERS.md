@@ -12,19 +12,19 @@
 | Shaokun Zhang   | [skzhang1](https://github.com/skzhang1)                    | Penn State University  | AgentOptimizer, Teachability            |
 | Yixuan Zhai     | [randombet](https://github.com/randombet)                  | Meta                   | group chat, sequential_chats, rag       |
 | Yiran Wu        | [yiranwu0](https://github.com/yiranwu0)                    | Penn State University  | alt-models, group chat, logging, infra  |
-| Beibin Li       | [BeibinLi](https://github.com/BeibinLi)                    | Microsoft Research     | alt-models                              |
 | Linxin Song     | [LinxinS97](https://github.com/LinxinS97)                  | University of Southern California | autobuild, group chat       |
 | Jieyu Zhang     | [JieyuZ2](https://jieyuz2.github.io/)                  | University of Washington | autobuild, group chat       |
 | Justin Trugman     | [jtrugman](https://github.com/jtrugman)                  | BetterFutureLabs | GPTAssistantAgent, Tool overwrite, Instruction Overwrite     |
 | Gregory Fanous  | [gregory-fanous](https://github.com/gregory-fanous)         | -                     | teachability, rag, tool calling     |
+| Davor Runje     | [davorrunje](https://github.com/davorrunje)                | airt.ai                | Tool calling, IO                        |
+| Aaron Ward     | [AaronWard](https://github.com/AaronWard)                | yappstore.ai                | all                      |
 
 **Pending Maintainers list (Marked with \*, Waiting for explicit approval from the maintainers)**
 | Name            | GitHub Handle                                              | Organization           | Features                                |
 |-----------------|------------------------------------------------------------|------------------------|-----------------------------------------|
-| Davor Runje *    | [davorrunje](https://github.com/davorrunje)                | airt.ai                | Tool calling, IO                        |
 | Olaoluwa Ademola Salami * | [olaoluwasalami](https://github.com/olaoluwasalami)  | DevOps Engineer        |                                          |
-| Li Jiang *      | [thinkall](https://github.com/thinkall)                    | Microsoft              | rag, autobuilder, group chat            |
 | Rajan Chari *    | [rajan-chari](https://github.com/rajan-chari)                | Microsoft Research                | CAP                        |
+| Evan David *    | [evandavid1](https://github.com/evandavid1)                | -                      | gpt assistant, group chat, rag, autobuild |
 
 ## I would like to join this list. How can I help the project?
 > We're always looking for new contributors to join our team and help improve the project. For more information, please refer to our [CONTRIBUTING](https://autogenhub.github.io/autogen/docs/contributor-guide/contributing) guide.

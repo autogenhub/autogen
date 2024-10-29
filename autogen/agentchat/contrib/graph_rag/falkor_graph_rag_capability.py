@@ -1,10 +1,12 @@
-from autogen.agentchat.contrib.capabilities.agent_capability import AgentCapability
-from autogen.agentchat.conversable_agent import ConversableAgent
+from typing import Dict, Optional, Union
 
-from .graph_query_engine import GraphQueryEngine
+from autogen import UserProxyAgent
+
+from .falkor_graph_query_engine import FalkorGraphQueryEngine, FalkorGraphQueryResult
+from .graph_rag_capability import GraphRagCapability
 
 
-class GraphRagCapability(AgentCapability):
+class FalkorGraphRagCapability(GraphRagCapability):
     """
     A graph rag capability uses a graph query engine to give a conversable agent the graph rag ability.
 
@@ -47,10 +49,38 @@ class GraphRagCapability(AgentCapability):
 
     """
 
-    def __init__(self, query_engine: GraphQueryEngine):
+    def __init__(self, query_engine: FalkorGraphQueryEngine):
         """
         initialize graph rag capability with a graph query engine
         """
-        ...
+        self.query_engine = query_engine
 
-    def add_to_agent(self, agent: ConversableAgent): ...
+    def add_to_agent(self, agent: UserProxyAgent):
+        self.graph_rag_agent = agent
+
+        # Validate the agent config
+        if agent.llm_config not in (None, False):
+            raise Exception(
+                "Graph rag capability limits the query to graph DB, llm_config must be a dict or False or None."
+            )
+
+        # Register a hook for processing the last message.
+        agent.register_hook(hookable_method="process_last_received_message", hook=self.process_last_received_message)
+
+        # Append extra info to the system message.
+        agent.update_system_message(
+            agent.system_message + "\nYou've been given the special ability to use graph rag to retrieve information."
+        )
+
+    def process_last_received_message(self, message: Union[Dict, str]):
+        question = self._get_last_question(message)
+        result: FalkorGraphQueryResult = self.query_engine.query(question)
+        return result.answer
+
+    def _get_last_question(self, message: Union[Dict, str]):
+        if isinstance(message, str):
+            return message
+        if isinstance(message, Dict):
+            if "content" in message:
+                return message["content"]
+        return None

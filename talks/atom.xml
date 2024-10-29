@@ -2,18 +2,27 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://autogenhub.github.io/autogen/talks</id>
     <title>AutoGen Blog</title>
-    <updated>2024-10-28T16:47:47.000Z</updated>
+    <updated>2024-10-29T01:07:39.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://autogenhub.github.io/autogen/talks"/>
     <subtitle>AutoGen Blog</subtitle>
     <icon>https://autogenhub.github.io/autogen/img/ag.ico</icon>
     <entry>
-        <title type="html"><![CDATA[Future Talks]]></title>
+        <title type="html"><![CDATA[Upcoming  Talks]]></title>
         <id>https://autogenhub.github.io/autogen/talks/future-talks</id>
         <link href="https://autogenhub.github.io/autogen/talks/future-talks"/>
-        <updated>2024-10-28T16:47:47.000Z</updated>
-        <summary type="html"><![CDATA[Coming soon! Join our community to be the first to know about upcoming talks.]]></summary>
-        <content type="html"><![CDATA[<p>Coming soon! Join our community to be the first to know about upcoming talks.</p>
+        <updated>2024-10-29T01:07:39.000Z</updated>
+        <summary type="html"><![CDATA[Multi-AI Agents for Chip Design with Distilled Knowledge Debugging Graph, Task Graph Solving, and Multi-Modal Capabilities - Nov 9, 2024]]></summary>
+        <content type="html"><![CDATA[<h2 class="anchor anchorWithStickyNavbar_LWe7" id="multi-ai-agents-for-chip-design-with-distilled-knowledge-debugging-graph-task-graph-solving-and-multi-modal-capabilities---nov-9-2024">Multi-AI Agents for Chip Design with Distilled Knowledge Debugging Graph, Task Graph Solving, and Multi-Modal Capabilities - Nov 9, 2024<a href="https://autogenhub.github.io/autogen/talks/future-talks#multi-ai-agents-for-chip-design-with-distilled-knowledge-debugging-graph-task-graph-solving-and-multi-modal-capabilities---nov-9-2024" class="hash-link" aria-label="Direct link to Multi-AI Agents for Chip Design with Distilled Knowledge Debugging Graph, Task Graph Solving, and Multi-Modal Capabilities - Nov 9, 2024" title="Direct link to Multi-AI Agents for Chip Design with Distilled Knowledge Debugging Graph, Task Graph Solving, and Multi-Modal Capabilities - Nov 9, 2024">​</a></h2>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="speakers-chia-tung-ho">Speakers: Chia-Tung Ho<a href="https://autogenhub.github.io/autogen/talks/future-talks#speakers-chia-tung-ho" class="hash-link" aria-label="Direct link to Speakers: Chia-Tung Ho" title="Direct link to Speakers: Chia-Tung Ho">​</a></h3>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="biography-of-the-speakers">Biography of the speakers:<a href="https://autogenhub.github.io/autogen/talks/future-talks#biography-of-the-speakers" class="hash-link" aria-label="Direct link to Biography of the speakers:" title="Direct link to Biography of the speakers:">​</a></h3>
+<p>Chia-Tung Ho is a senior research scientist at Nvidia Research. He received his Ph.D. in electrical and computer engineering from the University of California, San Diego, USA, in 2022. Chia-Tung has several years of experience in the EDA industry. Before moving to the US, he worked for IDM and EDA companies in Taiwan, developing in-house design-for-manufacturing (DFM) flows at Macronix, as well as fastSPICE solutions at Mentor Graphics and Synopsis. During his Ph.D., he collaborated with the Design Technology Co-Optimization (DTCO) team at Synopsis and served as an AI resident at X, the Moonshot Factory (formerly Google X). His recent work focuses on developing LLM agents for chip design and integrating advanced knowledge extraction, task graph solving, and reinforcement learning techniques for debugging and design optimization.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="abstract">Abstract:<a href="https://autogenhub.github.io/autogen/talks/future-talks#abstract" class="hash-link" aria-label="Direct link to Abstract:" title="Direct link to Abstract:">​</a></h3>
+<p>Hardware design presents numerous challenges due to its complexity and rapidly advancing technologies. The stringent requirements for performance, power, area, and cost (PPAC) in modern complex designs, which can include up to billions of transistors, make hardware design increasingly demanding compared to earlier generations. These challenges result in longer turnaround times (TAT) for optimizing PPAC during RTL synthesis, simulation, verification, physical design, and reliability processes.
+In this talk, we introduce multi-AI agents built on top of AutoGen to improve efficiency and reduce TAT in the chip design process. The talk explores the integration of novel distilled knowledge debugging graphs, task graph solving, and multimodal capabilities within multi-AI agents to address tasks such as timing debugging, Verilog debugging, and Design Rule Check (DRC) code generation. Based on these studies, multi-AI agents demonstrate promising improvements in performance, productivity, and efficiency in chip design.</p>
+<h3 class="anchor anchorWithStickyNavbar_LWe7" id="sign-up--httpsdiscordgg8wfkcvn2event1300487847681196082">Sign Up:  <a href="https://discord.gg/8WFKcVN2?event=1300487847681196082" target="_blank" rel="noopener noreferrer">https://discord.gg/8WFKcVN2?event=1300487847681196082</a><a href="https://autogenhub.github.io/autogen/talks/future-talks#sign-up--httpsdiscordgg8wfkcvn2event1300487847681196082" class="hash-link" aria-label="Direct link to sign-up--httpsdiscordgg8wfkcvn2event1300487847681196082" title="Direct link to sign-up--httpsdiscordgg8wfkcvn2event1300487847681196082">​</a></h3>
+<h2 class="anchor anchorWithStickyNavbar_LWe7" id="how-to-follow-up-with-the-latest-talks">How to follow up with the latest talks?<a href="https://autogenhub.github.io/autogen/talks/future-talks#how-to-follow-up-with-the-latest-talks" class="hash-link" aria-label="Direct link to How to follow up with the latest talks?" title="Direct link to How to follow up with the latest talks?">​</a></h2>
+<p>Join our community Discord (<a href="https://discord.gg/sUkGceyd" target="_blank" rel="noopener noreferrer">https://discord.gg/sUkGceyd</a>) to be the first to know about amazing upcoming talks!</p>
 <p>Connect: <a href="mailto:shaokunzhang529@gmail.com" target="_blank" rel="noopener noreferrer">shaokunzhang529@gmail.com</a></p>]]></content>
     </entry>
     <entry>

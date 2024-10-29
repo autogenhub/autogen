@@ -640,7 +640,11 @@ def test_gpt_reflection_with_llm() -> None:
 )
 def test_assistant_tool_and_function_role_messages() -> None:
     """
+<<<<<<< HEAD
     Tests that internally generated roles ('tool', 'function') are correctly mapped to 
+=======
+    Tests that internally generated roles ('tool', 'function') are correctly mapped to
+>>>>>>> 3c1a835040 (fix pre-commit formatting)
     OpenAI Assistant API-compatible role ('assistant') before sending to the OpenAI API
     to prevent BadRequestError when using GPTAssistantAgent with other tool-calling agents.
 
@@ -686,7 +690,7 @@ def test_assistant_tool_and_function_role_messages() -> None:
                     "role": "assistant",
                     "content": "The weather is sunny and 72 degrees.",
                 },
-            ]
+            ],
         ]
 
         # Test each case
@@ -702,7 +706,6 @@ def test_assistant_tool_and_function_role_messages() -> None:
 
     finally:
         assistant.delete_assistant()
-        
 
 if __name__ == "__main__":
     # test_gpt_assistant_chat()

@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 from autogen import UserProxyAgent
 
@@ -8,45 +8,10 @@ from .graph_rag_capability import GraphRagCapability
 
 class FalkorGraphRagCapability(GraphRagCapability):
     """
-    A graph rag capability uses a graph query engine to give a conversable agent the graph rag ability.
+    The Falkor graph rag capability integrate FalkorDB graphrag_sdk version: 0.1.3b0.
+    Ref: https://github.com/FalkorDB/GraphRAG-SDK/tree/2-move-away-from-sql-to-json-ontology-detection
 
-    An agent class with graph rag capability could
-    1. create a graph in the underlying database with input documents.
-    2. retrieved relevant information based on messages received by the agent.
-    3. generate answers from retrieved information and send messages back.
-
-    For example,
-    graph_query_engine = GraphQueryEngine(...)
-    graph_query_engine.init_db([Document(doc1), Document(doc2), ...])
-
-    graph_rag_agent = ConversableAgent(
-        name="graph_rag_agent",
-        max_consecutive_auto_reply=3,
-        ...
-    )
-    graph_rag_capability = GraphRagCapbility(graph_query_engine)
-    graph_rag_capability.add_to_agent(graph_rag_agent)
-
-    user_proxy = UserProxyAgent(
-        name="user_proxy",
-        code_execution_config=False,
-        is_termination_msg=lambda msg: "TERMINATE" in msg["content"],
-        human_input_mode="ALWAYS",
-    )
-    user_proxy.initiate_chat(graph_rag_agent, message="Name a few actors who've played in 'The Matrix'")
-
-    # ChatResult(
-        # chat_id=None,
-        # chat_history=[
-            # {'content': 'Name a few actors who've played in \'The Matrix\'', 'role': 'graph_rag_agent'},
-            # {'content': 'A few actors who have played in The Matrix are:
-            #   - Keanu Reeves
-            #   - Laurence Fishburne
-            #   - Carrie-Anne Moss
-            #   - Hugo Weaving',
-            #   'role': 'user_proxy'},
-        # ...)
-
+    For usage, please refer to example notebook/agentchat_graph_rag_falkordb.ipynb
     """
 
     def __init__(self, query_engine: FalkorGraphQueryEngine):
@@ -55,7 +20,14 @@ class FalkorGraphRagCapability(GraphRagCapability):
         """
         self.query_engine = query_engine
 
+        # Graph DB query history.
+        self._history = []
+
     def add_to_agent(self, agent: UserProxyAgent):
+        """
+        Add FalkorDB graph RAG capability to a UserProxyAgent.
+        The restriction to a UserProxyAgent to make sure the returned message does not contain information retrieved from the graph DB instead of any LLMs.
+        """
         self.graph_rag_agent = agent
 
         # Validate the agent config
@@ -73,8 +45,13 @@ class FalkorGraphRagCapability(GraphRagCapability):
         )
 
     def process_last_received_message(self, message: Union[Dict, str]):
+        """
+        Query FalkorDB before return the message.
+        The history with FalkorDB is also logged and updated.
+        """
         question = self._get_last_question(message)
-        result: FalkorGraphQueryResult = self.query_engine.query(question)
+        result: FalkorGraphQueryResult = self.query_engine.query(question, self._history)
+        self._history = result.messages
         return result.answer
 
     def _get_last_question(self, message: Union[Dict, str]):

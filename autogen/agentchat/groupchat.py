@@ -23,6 +23,7 @@ from ..runtime_logging import log_new_agent, logging_enabled
 from .agent import Agent
 from .contrib.capabilities import transform_messages
 from .conversable_agent import ConversableAgent
+from .swarm import SwarmAgent
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,7 @@ class GroupChat:
         - "manual": the next speaker is selected manually by user input.
         - "random": the next speaker is selected randomly.
         - "round_robin": the next speaker is selected in a round robin fashion, i.e., iterating in the same order as provided in `agents`.
+        - "swarm": utilises the swarm pattern, where agents continue to speak until they handoff to another agent.
         - a customized speaker selection function (Callable): the function will be called to select the next speaker.
             The function should take the last speaker and the group chat as input and return one of the following:
                 1. an `Agent` class, it must be one of the agents in the group chat.
@@ -116,7 +118,7 @@ class GroupChat:
     max_round: int = 10
     admin_name: str = "Admin"
     func_call_filter: bool = True
-    speaker_selection_method: Union[Literal["auto", "manual", "random", "round_robin"], Callable] = "auto"
+    speaker_selection_method: Union[Literal["auto", "manual", "random", "round_robin", "swarm"], Callable] = "auto"
     max_retries_for_selecting_speaker: int = 2
     allow_repeat_speaker: Optional[Union[bool, List[Agent]]] = None
     allowed_or_disallowed_speaker_transitions: Optional[Dict] = None
@@ -149,7 +151,7 @@ class GroupChat:
     select_speaker_auto_llm_config: Optional[Union[Dict, Literal[False]]] = None
     role_for_select_speaker_messages: Optional[str] = "system"
 
-    _VALID_SPEAKER_SELECTION_METHODS = ["auto", "manual", "random", "round_robin"]
+    _VALID_SPEAKER_SELECTION_METHODS = ["auto", "manual", "random", "round_robin", "swarm"]
     _VALID_SPEAKER_TRANSITIONS_TYPE = ["allowed", "disallowed", None]
 
     # Define a class attribute for the default introduction message
@@ -275,6 +277,10 @@ class GroupChat:
         # Validate select_speaker_auto_verbose
         if self.select_speaker_auto_verbose is None or not isinstance(self.select_speaker_auto_verbose, bool):
             raise ValueError("select_speaker_auto_verbose cannot be None or non-bool")
+
+        # Ensure, for swarms, all agents are swarm agents
+        if self.speaker_selection_method == "swarm" and not all(isinstance(agent, SwarmAgent) for agent in self.agents):
+            raise ValueError("All agents must be of type SwarmAgent when using the 'swarm' speaker selection method.")
 
     @property
     def agent_names(self) -> List[str]:
@@ -419,6 +425,34 @@ class GroupChat:
             agents = self.agents
         return random.choice(agents)
 
+    def swarm_select_speaker(self, last_speaker: Agent, agents: Optional[List[Agent]] = None) -> Union[Agent, None]:
+        messages = self.messages
+
+        # TODO TODO TODO
+
+        # Always start with the first speaker
+        if len(messages) <= 1:
+            return last_speaker
+
+        # If the last message is a tool call, the last agent should execute it
+        if "tool_calls" in messages[-1]:
+            return last_speaker  # If it's a tool_call then the agent executes it
+
+        # If the last message is a tool response, check if the tool response is the name of the next agent
+        # Otherwise return the last agent before the tool call
+        if "tool_responses" in messages[-1]:
+            tool_call_msg = messages[-1].get("content", "")
+            if self.agent_by_name(name=tool_call_msg):
+                return self.agent_by_name(name=messages[-1].get("content", ""))
+
+            return self.agent_by_name(name=messages[-2].get("name", ""))
+
+        # elif last_speaker in [flight_modification, flight_cancel, flight_change, lost_baggage, triage_agent]:
+        # return user
+
+        else:
+            return self.agent_by_name(name=messages[-2].get("name", ""))
+
     def _prepare_and_select_agents(
         self,
         last_speaker: Agent,
@@ -466,7 +500,9 @@ class GroupChat:
                 f"GroupChat is underpopulated with {n_agents} agents. "
                 "Please add more agents to the GroupChat or use direct communication instead."
             )
-        elif n_agents == 2 and speaker_selection_method.lower() != "round_robin" and allow_repeat_speaker:
+        elif (
+            n_agents == 2 and speaker_selection_method.lower() not in ["round_robin", "swarm"] and allow_repeat_speaker
+        ):
             logger.warning(
                 f"GroupChat is underpopulated with {n_agents} agents. "
                 "Consider setting speaker_selection_method to 'round_robin' or allow_repeat_speaker to False, "
@@ -536,6 +572,8 @@ class GroupChat:
             selected_agent = self.next_agent(last_speaker, graph_eligible_agents)
         elif speaker_selection_method.lower() == "random":
             selected_agent = self.random_select_speaker(graph_eligible_agents)
+        elif speaker_selection_method.lower() == "swarm":
+            selected_agent = self.swarm_select_speaker(last_speaker, graph_eligible_agents)
         else:  # auto
             selected_agent = None
             select_speaker_messages = self.messages.copy()
@@ -544,6 +582,7 @@ class GroupChat:
                 select_speaker_messages[-1] = dict(select_speaker_messages[-1], function_call=None)
             if select_speaker_messages[-1].get("tool_calls", False):
                 select_speaker_messages[-1] = dict(select_speaker_messages[-1], tool_calls=None)
+
         return selected_agent, graph_eligible_agents, select_speaker_messages
 
     def select_speaker(self, last_speaker: Agent, selector: ConversableAgent) -> Agent:
@@ -1130,6 +1169,7 @@ class GroupChatManager(ConversableAgent):
         messages: Optional[List[Dict]] = None,
         sender: Optional[Agent] = None,
         config: Optional[GroupChat] = None,
+        context_variables: Optional[Dict] = {},  # For Swarms
     ) -> Tuple[bool, Optional[str]]:
         """Run a group chat."""
         if messages is None:
@@ -1139,6 +1179,11 @@ class GroupChatManager(ConversableAgent):
         groupchat = config
         send_introductions = getattr(groupchat, "send_introductions", False)
         silent = getattr(self, "_silent", False)
+
+        # Swarm
+        if self.groupchat.speaker_selection_method == "swarm":
+            context_variables = copy.deepcopy(context_variables)
+            config.allow_repeat_speaker = True  # Swarms allow the last speaker to be the next speaker
 
         if send_introductions:
             # Broadcast the intro
@@ -1210,6 +1255,7 @@ class GroupChatManager(ConversableAgent):
         messages: Optional[List[Dict]] = None,
         sender: Optional[Agent] = None,
         config: Optional[GroupChat] = None,
+        context_variables: Optional[Dict] = {},  # For Swarms
     ):
         """Run a group chat asynchronously."""
         if messages is None:

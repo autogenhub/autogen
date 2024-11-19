@@ -41,6 +41,7 @@ from ..oai.client import ModelClient, OpenAIWrapper
 from ..runtime_logging import log_event, log_function_use, log_new_agent, logging_enabled
 from .agent import Agent, LLMAgent
 from .chat import ChatResult, a_initiate_chats, initiate_chats
+from .custom_nested_chat_condition import CustomNestedChatCondition
 from .utils import consolidate_chat_info, gather_usage_summary
 
 __all__ = ("ConversableAgent",)
@@ -301,7 +302,7 @@ class ConversableAgent(LLMAgent):
 
     def register_reply(
         self,
-        trigger: Union[Type[Agent], str, Agent, Callable[[Agent], bool], List],
+        trigger: Union[Type[Agent], str, Agent, Callable[[Agent], bool], CustomNestedChatCondition, List],
         reply_func: Callable,
         position: int = 0,
         config: Optional[Any] = None,
@@ -355,8 +356,10 @@ class ConversableAgent(LLMAgent):
                 function.
             remove_other_reply_funcs (bool): whether to remove other reply functions when registering this reply function.
         """
-        if not isinstance(trigger, (type, str, Agent, Callable, list)):
-            raise ValueError("trigger must be a class, a string, an agent, a callable or a list.")
+        if not isinstance(trigger, (type, str, Agent, Callable, list, CustomNestedChatCondition)):
+            raise ValueError(
+                "trigger must be a class, a string, an agent, a callable, CustomNestedChatCondition or a list."
+            )
         if remove_other_reply_funcs:
             self._reply_func_list.clear()
         self._reply_func_list.insert(
@@ -2159,6 +2162,12 @@ class ConversableAgent(LLMAgent):
             return trigger == sender
         elif isinstance(trigger, Callable):
             rst = trigger(sender)
+            assert isinstance(rst, bool), f"trigger {trigger} must return a boolean value."
+            return rst
+        elif isinstance(trigger, CustomNestedChatCondition):
+            rst = trigger.call_function()
+            if trigger.state_params is not None:
+                trigger.call_function
             assert isinstance(rst, bool), f"trigger {trigger} must return a boolean value."
             return rst
         elif isinstance(trigger, list):
